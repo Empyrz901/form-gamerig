@@ -3,328 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming PC Configuration Builder</title>
+    <title>PC Build Configurator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🖥️ Gaming PC Configuration Builder</h1>
-            <p>Build your perfect gaming rig</p>
+            <h1>PC Build Configurator</h1>
+            <p>Design your build and export a clean PDF spec sheet.</p>
         </header>
 
-        <form id="rigConfigForm">
-            <!-- PRESET CONFIGURATIONS -->
+        <form id="rigConfigForm" novalidate>
             <fieldset class="form-section preset-section">
-                <legend>⚡ Quick Start: Preset Configurations</legend>
-                <p style="margin-bottom: 15px; color: #666;">Load a preconfigured setup and customize as needed:</p>
-                
+                <legend>Quick start</legend>
                 <div class="preset-grid">
                     <div class="preset-card">
-                        <h3>🎮 Gaming Build (Recommended)</h3>
+                        <h3>Recommended gaming build</h3>
                         <div class="preset-specs">
-                            <p><strong>CPU:</strong> Ryzen 7 7800X3D</p>
-                            <p><strong>GPU:</strong> RX 9060 XT 16GB</p>
-                            <p><strong>RAM:</strong> 32GB DDR5 6000MHz</p>
-                            <p><strong>Mobo:</strong> ASUS B650E-E WiFi</p>
-                            <p><strong>PSU:</strong> NZXT C850W ATX 3.1</p>
-                            <p><strong>Storage:</strong> 1TB SSD</p>
+                            <p><strong>CPU</strong> Ryzen 7 7800X3D</p>
+                            <p><strong>GPU</strong> RX 9060 XT 16GB</p>
+                            <p><strong>RAM</strong> 32GB DDR5 6000</p>
+                            <p><strong>Board</strong> ASUS B650E-E WiFi</p>
+                            <p><strong>PSU</strong> NZXT C850W ATX 3.1</p>
+                            <p><strong>Storage</strong> 1TB NVMe SSD</p>
                         </div>
-                        <div class="preset-price">
-                            <strong>~1440 CHF</strong>
-                        </div>
-                        <button type="button" class="btn btn-preset" onclick="loadPresetGaming()">Load Configuration</button>
+                        <div class="preset-price">~1,440 CHF</div>
+                        <button type="button" class="btn-preset" onclick="loadPresetGaming()">Load configuration</button>
                     </div>
 
                     <div class="preset-card">
-                        <h3>💼 Custom Setup</h3>
-                        <p style="margin: 15px 0;">Build your own configuration from scratch with full customization options below.</p>
-                        <button type="button" class="btn btn-preset" onclick="resetForm()">Start Fresh</button>
+                        <h3>Start from scratch</h3>
+                        <div class="preset-specs">
+                            <p>Build a custom configuration. Fill in only what you care about — every field is editable below.</p>
+                        </div>
+                        <button type="button" class="btn-preset btn-ghost" onclick="resetForm()">Clear form</button>
                     </div>
                 </div>
             </fieldset>
 
-            <!-- CASE -->
             <fieldset class="form-section">
-                <legend>Case & Form Factor</legend>
-                <div class="form-group">
-                    <label for="case">Case Preference (Freeform):</label>
-                    <input type="text" id="case" name="case" placeholder="e.g., Lian Li O11 Dynamic, NZXT H7 Flow, etc." required>
-                    <small>Budget case (~100 CHF): NZXT H7 Flow, Corsair 4000D, Fractal Design Core 1000</small>
-                </div>
-            </fieldset>
-
-            <!-- BUDGET & PURPOSE -->
-            <fieldset class="form-section">
-                <legend>Configuration Basics</legend>
+                <legend>Goals</legend>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="budget">Budget (USD):</label>
-                        <input type="number" id="budget" name="budget" placeholder="e.g., 2000" min="500" required>
+                        <label for="budget">Budget (CHF)</label>
+                        <input type="number" id="budget" name="budget" placeholder="2000" min="500" required>
                     </div>
                     <div class="form-group">
-                        <label for="purpose">Primary Purpose:</label>
+                        <label for="purpose">Primary use</label>
                         <select id="purpose" name="purpose" required>
-                            <option value="">-- Select --</option>
+                            <option value="">Select...</option>
                             <option value="gaming">Gaming</option>
-                            <option value="gaming-streaming">Gaming + Streaming</option>
-                            <option value="gaming-content">Gaming + Content Creation</option>
-                            <option value="general">General Use</option>
+                            <option value="gaming-streaming">Gaming + streaming</option>
+                            <option value="gaming-content">Gaming + content creation</option>
+                            <option value="general">General use</option>
                         </select>
                     </div>
                 </div>
             </fieldset>
 
-            <!-- COLOR SCHEME & RGB -->
             <fieldset class="form-section">
-                <legend>Aesthetics</legend>
+                <legend>Case &amp; aesthetics</legend>
+                <div class="form-group">
+                    <label for="case">Case</label>
+                    <input type="text" id="case" name="case" placeholder="NZXT H7 Flow, Lian Li O11 Dynamic, Fractal North..." required>
+                    <small>Budget picks (~100 CHF): NZXT H7 Flow, Corsair 4000D, Fractal Core 1000.</small>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="colorScheme">Color Scheme:</label>
+                        <label for="colorScheme">Color scheme</label>
                         <select id="colorScheme" name="colorScheme" required>
-                            <option value="">-- Select --</option>
-                            <option value="white">White Build</option>
-                            <option value="black">Black Build</option>
-                            <option value="mixed">Mixed (Black & White)</option>
+                            <option value="">Select...</option>
+                            <option value="white">White</option>
+                            <option value="black">Black</option>
+                            <option value="mixed">Black &amp; white</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="rgbPreference">RGB Lighting:</label>
+                        <label for="rgbPreference">RGB lighting</label>
                         <select id="rgbPreference" name="rgbPreference" required>
-                            <option value="">-- Select --</option>
-                            <option value="no">No RGB</option>
-                            <option value="minimal">Minimal RGB</option>
-                            <option value="moderate">Moderate RGB</option>
-                            <option value="full">Full RGB (RGB Fans & AIO)</option>
+                            <option value="">Select...</option>
+                            <option value="no">None</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="full">Full (fans &amp; AIO)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- RGB Strimer Option (conditional) -->
-                <div id="strimerOption" class="form-group hidden">
-                    <label>
-                        <input type="checkbox" id="strimerCables" name="strimerCables">
-                        RGB Strimer Cables (replaces standard PSU/motherboard cables)
-                    </label>
-                    <small>Note: Requires compatible PSU and additional cost</small>
+                <div id="strimerOption" class="form-group checkbox-group hidden">
+                    <input type="checkbox" id="strimerCables" name="strimerCables">
+                    <div>
+                        <label for="strimerCables">RGB Strimer cables</label>
+                        <small>Replaces PSU and motherboard cables. Adds cost and requires a compatible PSU.</small>
+                    </div>
                 </div>
             </fieldset>
 
-            <!-- MOTHERBOARD -->
             <fieldset class="form-section">
                 <legend>Motherboard</legend>
-                <p class="note">Recommended: ASUS ROG STRIX B650E-E WIFI (best price/quality ratio)</p>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="wifiEnabled" name="wifiEnabled">
-                            WiFi Support
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="ethernet10gb" name="ethernet10gb">
-                            10GB Ethernet
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="overclockVRM" name="overclockVRM">
-                            Overclocking Support (high-quality VRM)
-                        </label>
-                    </div>
-                </div>
+                <p class="note">Reference: ASUS ROG STRIX B650E-E WiFi — strong VRMs and feature set for the price.</p>
 
                 <div class="form-group">
-                    <label for="motherboardModel">Specific Motherboard Model (Optional):</label>
-                    <input type="text" id="motherboardModel" name="motherboardModel" placeholder="e.g., ASUS ROG STRIX B650E-E WIFI">
+                    <label for="motherboardModel">Specific model (optional)</label>
+                    <input type="text" id="motherboardModel" name="motherboardModel" placeholder="e.g. ASUS ROG STRIX B650E-E WiFi">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="wifiEnabled" name="wifiEnabled">
+                        <label for="wifiEnabled">WiFi</label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="ethernet10gb" name="ethernet10gb">
+                        <label for="ethernet10gb">10GbE</label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="overclockVRM" name="overclockVRM">
+                        <label for="overclockVRM">Overclocking-grade VRM</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <!-- CPU -->
             <fieldset class="form-section">
-                <legend>Processor (CPU)</legend>
-                <div class="form-group">
-                    <label for="cpuBrand">CPU Brand Preference:</label>
-                    <select id="cpuBrand" name="cpuBrand" required>
-                        <option value="">-- Select --</option>
-                        <option value="intel">Intel</option>
-                        <option value="amd">AMD</option>
-                        <option value="no-preference">No Preference (Best Value)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="cpuModel">Specific CPU Model (Optional):</label>
-                    <input type="text" id="cpuModel" name="cpuModel" placeholder="e.g., Intel Core i7-14700K, AMD Ryzen 7 9700X">
+                <legend>Processor</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cpuBrand">Brand</label>
+                        <select id="cpuBrand" name="cpuBrand" required>
+                            <option value="">Select...</option>
+                            <option value="intel">Intel</option>
+                            <option value="amd">AMD</option>
+                            <option value="no-preference">No preference (best value)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cpuModel">Specific model (optional)</label>
+                        <input type="text" id="cpuModel" name="cpuModel" placeholder="e.g. Ryzen 7 7800X3D, Core i7-14700K">
+                    </div>
                 </div>
             </fieldset>
 
-            <!-- RAM -->
             <fieldset class="form-section">
-                <legend>Memory (RAM)</legend>
-                <p class="note">Recommended: Minimum 6000MHz for DDR5</p>
-                
+                <legend>Memory</legend>
+                <p class="note">DDR5 at 6000 MT/s is the sweet spot on AM5 and modern Intel platforms.</p>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="ramCapacity">RAM Capacity:</label>
+                        <label for="ramCapacity">Capacity</label>
                         <select id="ramCapacity" name="ramCapacity" required>
-                            <option value="">-- Select --</option>
-                            <option value="32gb">32GB (2x16GB)</option>
-                            <option value="48gb">48GB (2x24GB)</option>
-                            <option value="64gb">64GB (2x32GB)</option>
-                            <option value="96gb">96GB (2x48GB)</option>
+                            <option value="">Select...</option>
+                            <option value="32gb">32GB (2x16)</option>
+                            <option value="48gb">48GB (2x24)</option>
+                            <option value="64gb">64GB (2x32)</option>
+                            <option value="96gb">96GB (2x48)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="ramSpeed">RAM Speed (MHz):</label>
+                        <label for="ramSpeed">Speed</label>
                         <select id="ramSpeed" name="ramSpeed" required>
-                            <option value="">-- Select --</option>
-                            <option value="5600">5600MHz DDR5</option>
-                            <option value="6000" selected>6000MHz DDR5 (Recommended)</option>
-                            <option value="6400">6400MHz DDR5</option>
-                            <option value="6800">6800MHz DDR5+</option>
+                            <option value="">Select...</option>
+                            <option value="5600">DDR5-5600</option>
+                            <option value="6000" selected>DDR5-6000 (recommended)</option>
+                            <option value="6400">DDR5-6400</option>
+                            <option value="6800">DDR5-6800+</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="ramBrand">RAM Brand Preference (Optional):</label>
-                    <input type="text" id="ramBrand" name="ramBrand" placeholder="e.g., Corsair, G.Skill, Kingston">
+                    <label for="ramBrand">Brand (optional)</label>
+                    <input type="text" id="ramBrand" name="ramBrand" placeholder="e.g. G.Skill, Corsair, Kingston">
                 </div>
             </fieldset>
 
-            <!-- GPU -->
             <fieldset class="form-section">
-                <legend>Graphics Card (GPU)</legend>
-                <div class="form-group">
-                    <label for="gpuBrand">GPU Brand Preference:</label>
-                    <select id="gpuBrand" name="gpuBrand" required>
-                        <option value="">-- Select --</option>
-                        <option value="nvidia">NVIDIA (RTX)</option>
-                        <option value="amd">AMD (Radeon)</option>
-                        <option value="no-preference">No Preference (Best Value)</option>
-                    </select>
+                <legend>Graphics</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gpuBrand">Brand</label>
+                        <select id="gpuBrand" name="gpuBrand" required>
+                            <option value="">Select...</option>
+                            <option value="nvidia">NVIDIA (RTX)</option>
+                            <option value="amd">AMD (Radeon)</option>
+                            <option value="no-preference">No preference (best value)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vram">VRAM</label>
+                        <select id="vram" name="vram" required>
+                            <option value="">Select...</option>
+                            <option value="12gb">12GB</option>
+                            <option value="16gb">16GB</option>
+                            <option value="24gb">24GB</option>
+                            <option value="32gb">32GB+</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="vram">VRAM Capacity Preference:</label>
-                    <select id="vram" name="vram" required>
-                        <option value="">-- Select --</option>
-                        <option value="12gb">12GB</option>
-                        <option value="16gb">16GB</option>
-                        <option value="24gb">24GB</option>
-                        <option value="32gb">32GB+</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="gpuModel">Specific GPU Model (Optional):</label>
-                    <input type="text" id="gpuModel" name="gpuModel" placeholder="e.g., RTX 4080, RTX 5090, RX 7900XTX">
+                    <label for="gpuModel">Specific model (optional)</label>
+                    <input type="text" id="gpuModel" name="gpuModel" placeholder="e.g. RTX 5080, RX 7900 XTX">
                 </div>
             </fieldset>
 
-            <!-- COOLING -->
             <fieldset class="form-section">
-                <legend>CPU Cooling Solution</legend>
+                <legend>CPU cooling</legend>
                 <div class="form-group">
-                    <label for="coolingType">Cooling Type:</label>
+                    <label for="coolingType">Type</label>
                     <select id="coolingType" name="coolingType" required>
-                        <option value="">-- Select --</option>
-                        <option value="aio240">AIO Liquid Cooler (240mm)</option>
-                        <option value="aio280">AIO Liquid Cooler (280mm)</option>
-                        <option value="aio360">AIO Liquid Cooler (360mm)</option>
-                        <option value="air">Air Cooler (High-end)</option>
+                        <option value="">Select...</option>
+                        <option value="air-budget">Air — budget (50–70 CHF)</option>
+                        <option value="air-mid">Air — mid-range (80–120 CHF)</option>
+                        <option value="air-high">Air — high-end (150–200 CHF)</option>
+                        <option value="aio240">AIO — 240mm (100–130 CHF)</option>
+                        <option value="aio280">AIO — 280mm (120–150 CHF)</option>
+                        <option value="aio360">AIO — 360mm (150–200 CHF)</option>
                     </select>
+                    <small>Budget picks: Thermalright Peerless Assassin 120 SE (~60 CHF), Deepcool AK620 (~50 CHF), Arctic Freezer 34 (~70 CHF).</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="coolingBrand">Cooling Brand Preference (Optional):</label>
-                    <input type="text" id="coolingBrand" name="coolingBrand" placeholder="e.g., Corsair, NZXT, Asus">
+                    <label for="coolingBrand">Specific model (optional)</label>
+                    <input type="text" id="coolingBrand" name="coolingBrand" placeholder="e.g. Noctua NH-D15, Corsair H150i Elite">
                 </div>
             </fieldset>
 
-            <!-- STORAGE -->
+            <fieldset class="form-section">
+                <legend>Case fans</legend>
+                <p class="note">Most cases ship with 1–2 basic fans. Upgrading improves thermals and reduces noise.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="caseIntakeFans">Intake</label>
+                        <select id="caseIntakeFans" name="caseIntakeFans" required>
+                            <option value="">Select...</option>
+                            <option value="stock">Stock</option>
+                            <option value="1x120">+1× 120mm</option>
+                            <option value="2x120">+2× 120mm</option>
+                            <option value="3x120">+3× 120mm (full front)</option>
+                            <option value="2x140">+2× 140mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="caseExhaustFans">Exhaust</label>
+                        <select id="caseExhaustFans" name="caseExhaustFans" required>
+                            <option value="">Select...</option>
+                            <option value="stock">Stock</option>
+                            <option value="1x120">1× 120mm (rear)</option>
+                            <option value="1x140">1× 140mm (rear)</option>
+                            <option value="2x120">2× 120mm (top)</option>
+                            <option value="1x120-1x140">1× 120mm rear + 1× 140mm top</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fanBrand">Brand / model (optional)</label>
+                    <input type="text" id="fanBrand" name="fanBrand" placeholder="e.g. Noctua NF-F12, Arctic P12, be quiet! Silent Wings">
+                    <small>Budget picks: Arctic P12 PWM (~12 CHF), be quiet! Pure Wings 2 (~15 CHF), Corsair AF120 (~18 CHF).</small>
+                </div>
+
+                <div id="rgbFanOption" class="form-group checkbox-group hidden">
+                    <input type="checkbox" id="rgbFans" name="rgbFans">
+                    <div>
+                        <label for="rgbFans">RGB fans</label>
+                        <small>~5–10 CHF more per fan. Requires an RGB controller.</small>
+                    </div>
+                </div>
+            </fieldset>
+
             <fieldset class="form-section">
                 <legend>Storage</legend>
-                <p class="note">Budget SSD (~100 CHF for 1TB): Kingston A3000, Crucial P3, WD Blue SN580</p>
-                
-                <div class="form-group">
-                    <label for="ssdCapacity">Primary SSD Capacity:</label>
-                    <select id="ssdCapacity" name="ssdCapacity" required>
-                        <option value="">-- Select --</option>
-                        <option value="500gb">500GB</option>
-                        <option value="1tb">1TB</option>
-                        <option value="2tb">2TB</option>
-                        <option value="4tb">4TB</option>
-                    </select>
-                </div>
+                <p class="note">Budget NVMe (~100 CHF for 1TB): Kingston KC3000, Crucial P3 Plus, WD Blue SN580.</p>
 
-                <div class="form-group">
-                    <label for="additionalStorage">Additional Storage:</label>
-                    <select id="additionalStorage" name="additionalStorage" required>
-                        <option value="">-- Select --</option>
-                        <option value="none">None</option>
-                        <option value="ssd-additional">Additional SSD (Gaming/Apps)</option>
-                        <option value="hdd-eco">HDD (Archival/Economy Storage)</option>
-                        <option value="ssd-hdd">SSD + HDD</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ssdCapacity">Primary SSD</label>
+                        <select id="ssdCapacity" name="ssdCapacity" required>
+                            <option value="">Select...</option>
+                            <option value="500gb">500GB</option>
+                            <option value="1tb">1TB</option>
+                            <option value="2tb">2TB</option>
+                            <option value="4tb">4TB</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalStorage">Additional storage</label>
+                        <select id="additionalStorage" name="additionalStorage" required>
+                            <option value="">Select...</option>
+                            <option value="none">None</option>
+                            <option value="ssd-additional">Extra SSD</option>
+                            <option value="hdd-eco">HDD (archival)</option>
+                            <option value="ssd-hdd">SSD + HDD</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="additionalStorageDetails" class="form-group hidden">
-                    <label for="additionalCapacity">Additional Storage Capacity:</label>
-                    <input type="text" id="additionalCapacity" name="additionalCapacity" placeholder="e.g., 2TB SSD, 4TB HDD">
+                    <label for="additionalCapacity">Additional capacity</label>
+                    <input type="text" id="additionalCapacity" name="additionalCapacity" placeholder="e.g. 2TB SSD, 4TB HDD">
                 </div>
             </fieldset>
 
-            <!-- POWER SUPPLY -->
             <fieldset class="form-section">
-                <legend>Power Supply Unit (PSU)</legend>
-                
-                <div class="form-group">
-                    <label for="psuWattage">Estimated Wattage:</label>
-                    <select id="psuWattage" name="psuWattage" required>
-                        <option value="">-- Select (or skip) --</option>
-                        <option value="750w">750W</option>
-                        <option value="850w">850W</option>
-                        <option value="1000w">1000W</option>
-                        <option value="1200w">1200W+</option>
-                    </select>
+                <legend>Power supply</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="psuWattage">Wattage</label>
+                        <select id="psuWattage" name="psuWattage" required>
+                            <option value="">Select...</option>
+                            <option value="750w">750W</option>
+                            <option value="850w">850W</option>
+                            <option value="1000w">1000W</option>
+                            <option value="1200w">1200W+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="psuBrand">Brand (optional)</label>
+                        <input type="text" id="psuBrand" name="psuBrand" placeholder="e.g. Corsair, Seasonic, NZXT">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="psuBrand">PSU Brand Preference (Optional):</label>
-                    <input type="text" id="psuBrand" name="psuBrand" placeholder="e.g., Corsair, EVGA, Seasonic">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="psuModular" name="psuModular">
-                        Fully Modular (better cable management)
-                    </label>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="psuModular" name="psuModular">
+                    <label for="psuModular">Fully modular</label>
                 </div>
             </fieldset>
 
-            <!-- ADDITIONAL NOTES -->
             <fieldset class="form-section">
-                <legend>Additional Notes</legend>
+                <legend>Notes</legend>
                 <div class="form-group">
-                    <label for="notes">Additional Preferences or Notes:</label>
-                    <textarea id="notes" name="notes" rows="4" placeholder="e.g., Specific games you want to play, performance targets, etc."></textarea>
+                    <label for="notes">Anything else</label>
+                    <textarea id="notes" name="notes" rows="4" placeholder="Target games, resolution / refresh-rate targets, specific constraints..."></textarea>
                 </div>
-                
-                <div class="note-box">
-                    <strong>📋 Cable Management:</strong> Your build will have presentable cable management with good organization, though not at the level of a premium showcase setup.
+
+                <div class="info-box">
+                    <strong>Cable management.</strong> Builds include presentable cable routing — clean and organized, but not at the level of a premium showcase.
                 </div>
             </fieldset>
 
-            <!-- FORM ACTIONS -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">📄 Generate PDF Configuration</button>
-                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                <button type="submit" class="btn btn-primary">Generate PDF</button>
+                <button type="reset" class="btn btn-secondary">Clear form</button>
             </div>
         </form>
     </div>

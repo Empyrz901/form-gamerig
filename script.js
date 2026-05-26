@@ -1,350 +1,396 @@
-document.addEventListener('DOMContentLoaded', function() {
+const LABELS = {
+    purpose: {
+        'gaming': 'Gaming',
+        'gaming-streaming': 'Gaming + streaming',
+        'gaming-content': 'Gaming + content creation',
+        'general': 'General use',
+    },
+    colorScheme: {
+        'white': 'White',
+        'black': 'Black',
+        'mixed': 'Black & white',
+        'other': 'Other',
+    },
+    rgbPreference: {
+        'no': 'None',
+        'minimal': 'Minimal',
+        'moderate': 'Moderate',
+        'full': 'Full (fans & AIO)',
+    },
+    cpuBrand: {
+        'intel': 'Intel',
+        'amd': 'AMD',
+        'no-preference': 'No preference',
+    },
+    gpuBrand: {
+        'nvidia': 'NVIDIA',
+        'amd': 'AMD',
+        'no-preference': 'No preference',
+    },
+    coolingType: {
+        'air-budget': 'Air — budget',
+        'air-mid': 'Air — mid-range',
+        'air-high': 'Air — high-end',
+        'aio240': 'AIO 240mm',
+        'aio280': 'AIO 280mm',
+        'aio360': 'AIO 360mm',
+    },
+    ramCapacity: {
+        '32gb': '32GB (2×16)',
+        '48gb': '48GB (2×24)',
+        '64gb': '64GB (2×32)',
+        '96gb': '96GB (2×48)',
+    },
+    ramSpeed: {
+        '5600': 'DDR5-5600',
+        '6000': 'DDR5-6000',
+        '6400': 'DDR5-6400',
+        '6800': 'DDR5-6800+',
+    },
+    vram: {
+        '12gb': '12GB',
+        '16gb': '16GB',
+        '24gb': '24GB',
+        '32gb': '32GB+',
+    },
+    caseIntakeFans: {
+        'stock': 'Stock',
+        '1x120': '+1× 120mm',
+        '2x120': '+2× 120mm',
+        '3x120': '+3× 120mm (full front)',
+        '2x140': '+2× 140mm',
+    },
+    caseExhaustFans: {
+        'stock': 'Stock',
+        '1x120': '1× 120mm (rear)',
+        '1x140': '1× 140mm (rear)',
+        '2x120': '2× 120mm (top)',
+        '1x120-1x140': '1× 120mm rear + 1× 140mm top',
+    },
+    ssdCapacity: {
+        '500gb': '500GB',
+        '1tb': '1TB',
+        '2tb': '2TB',
+        '4tb': '4TB',
+    },
+    additionalStorage: {
+        'none': 'None',
+        'ssd-additional': 'Extra SSD',
+        'hdd-eco': 'HDD (archival)',
+        'ssd-hdd': 'SSD + HDD',
+    },
+    psuWattage: {
+        '750w': '750W',
+        '850w': '850W',
+        '1000w': '1000W',
+        '1200w': '1200W+',
+    },
+};
+
+const GAMING_PRESET = {
+    case: 'NZXT H7 Flow (~100 CHF)',
+    budget: '1440',
+    purpose: 'gaming',
+    colorScheme: 'black',
+    rgbPreference: 'minimal',
+    wifiEnabled: true,
+    overclockVRM: true,
+    motherboardModel: 'ASUS ROG STRIX B650E-E WiFi (~160 CHF)',
+    cpuBrand: 'amd',
+    cpuModel: 'AMD Ryzen 7 7800X3D (~250 CHF)',
+    ramCapacity: '32gb',
+    ramSpeed: '6000',
+    ramBrand: 'G.Skill / Corsair (~350 CHF)',
+    gpuBrand: 'amd',
+    vram: '16gb',
+    gpuModel: 'AMD Radeon RX 9060 XT 16GB (~370 CHF)',
+    coolingType: 'air-budget',
+    coolingBrand: 'Thermalright Peerless Assassin 120 SE (~60 CHF)',
+    caseIntakeFans: '2x120',
+    caseExhaustFans: '1x120',
+    fanBrand: 'Arctic P12 PWM (~12 CHF each)',
+    ssdCapacity: '1tb',
+    additionalStorage: 'none',
+    psuWattage: '850w',
+    psuBrand: 'NZXT C850W ATX 3.1 (~110 CHF)',
+    psuModular: true,
+    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler is sufficient and quiet. Approx. total: 1,440 CHF (excluding case fans).',
+};
+
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('rigConfigForm');
-    const rgbPreferenceSelect = document.getElementById('rgbPreference');
+    const rgbSelect = document.getElementById('rgbPreference');
     const strimerOption = document.getElementById('strimerOption');
-    const additionalStorageSelect = document.getElementById('additionalStorage');
-    const additionalStorageDetails = document.getElementById('additionalStorageDetails');
+    const rgbFanOption = document.getElementById('rgbFanOption');
+    const storageSelect = document.getElementById('additionalStorage');
+    const storageDetails = document.getElementById('additionalStorageDetails');
 
-    // Load preset gaming configuration
-    window.loadPresetGaming = function() {
-        document.getElementById('case').value = 'NZXT H7 Flow (~100 CHF)';
-        document.getElementById('budget').value = '1440';
-        document.getElementById('purpose').value = 'gaming';
-        document.getElementById('colorScheme').value = 'black';
-        document.getElementById('rgbPreference').value = 'minimal';
-        document.getElementById('wifiEnabled').checked = true;
-        document.getElementById('ethernet10gb').checked = false;
-        document.getElementById('overclockVRM').checked = true;
-        document.getElementById('motherboardModel').value = 'ASUS ROG STRIX B650E-E WIFI (160 CHF)';
-        document.getElementById('cpuBrand').value = 'amd';
-        document.getElementById('cpuModel').value = 'AMD Ryzen 7 7800X3D (250 CHF)';
-        document.getElementById('ramCapacity').value = '32gb';
-        document.getElementById('ramSpeed').value = '6000';
-        document.getElementById('ramBrand').value = 'Corsair, G.Skill (350 CHF)';
-        document.getElementById('gpuBrand').value = 'amd';
-        document.getElementById('vram').value = '16gb';
-        document.getElementById('gpuModel').value = 'AMD Radeon RX 9060 XT 16GB (370 CHF)';
-        document.getElementById('coolingType').value = 'aio240';
-        document.getElementById('coolingBrand').value = 'Budget AIO';
-        document.getElementById('ssdCapacity').value = '1tb';
-        document.getElementById('additionalStorage').value = 'none';
-        document.getElementById('psuWattage').value = '850w';
-        document.getElementById('psuBrand').value = 'NZXT C850W ATX 3.1 (110 CHF)';
-        document.getElementById('psuModular').checked = true;
-        document.getElementById('notes').value = 'Gaming-focused setup with excellent CPU (7800X3D) and modern GPU (RX 9060 XT). Good balance of performance and price. Total: ~1440 CHF';
-        
-        // Trigger change events to update conditional fields
-        strimerOption.classList.add('hidden');
-        additionalStorageDetails.classList.add('hidden');
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Reset form to empty state
-    window.resetForm = function() {
+    window.loadPresetGaming = () => {
         form.reset();
-        strimerOption.classList.add('hidden');
-        additionalStorageDetails.classList.add('hidden');
+        applyPreset(GAMING_PRESET);
+        updateConditionalFields();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Show/hide RGB Strimer option based on RGB preference
-    rgbPreferenceSelect.addEventListener('change', function() {
-        if (this.value === 'full' || this.value === 'moderate') {
-            strimerOption.classList.remove('hidden');
-        } else {
-            strimerOption.classList.add('hidden');
-            document.getElementById('strimerCables').checked = false;
-        }
-    });
+    window.resetForm = () => {
+        form.reset();
+        updateConditionalFields();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-    // Show/hide additional storage capacity field
-    additionalStorageSelect.addEventListener('change', function() {
-        if (this.value !== 'none' && this.value !== '') {
-            additionalStorageDetails.classList.remove('hidden');
-        } else {
-            additionalStorageDetails.classList.add('hidden');
-        }
-    });
+    rgbSelect.addEventListener('change', updateConditionalFields);
+    storageSelect.addEventListener('change', updateConditionalFields);
 
-    // Handle form submission (PDF generation)
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
         generatePDF();
     });
 
-    function generatePDF() {
-        const formData = new FormData(form);
-        const config = {
-            case: formData.get('case'),
-            budget: formData.get('budget'),
-            purpose: formData.get('purpose'),
-            colorScheme: formData.get('colorScheme'),
-            rgbPreference: formData.get('rgbPreference'),
-            strimerCables: formData.get('strimerCables') ? 'Yes' : 'No',
-            wifiEnabled: formData.get('wifiEnabled') ? 'Yes' : 'No',
-            ethernet10gb: formData.get('ethernet10gb') ? 'Yes' : 'No',
-            overclockVRM: formData.get('overclockVRM') ? 'Yes' : 'No',
-            motherboardModel: formData.get('motherboardModel') || 'Not specified',
-            cpuBrand: formData.get('cpuBrand'),
-            cpuModel: formData.get('cpuModel') || 'Not specified',
-            ramCapacity: formData.get('ramCapacity'),
-            ramSpeed: formData.get('ramSpeed'),
-            ramBrand: formData.get('ramBrand') || 'Not specified',
-            gpuBrand: formData.get('gpuBrand'),
-            vram: formData.get('vram'),
-            gpuModel: formData.get('gpuModel') || 'Not specified',
-            coolingType: formData.get('coolingType'),
-            coolingBrand: formData.get('coolingBrand') || 'Not specified',
-            ssdCapacity: formData.get('ssdCapacity'),
-            additionalStorage: formData.get('additionalStorage'),
-            additionalCapacity: formData.get('additionalCapacity') || 'Not specified',
-            psuWattage: formData.get('psuWattage'),
-            psuBrand: formData.get('psuBrand') || 'Not specified',
-            psuModular: formData.get('psuModular') ? 'Yes (Fully Modular)' : 'Standard',
-            notes: formData.get('notes') || 'No additional notes'
-        };
+    function applyPreset(preset) {
+        for (const [key, value] of Object.entries(preset)) {
+            const el = document.getElementById(key);
+            if (!el) continue;
+            if (el.type === 'checkbox') {
+                el.checked = Boolean(value);
+            } else {
+                el.value = value;
+            }
+        }
+    }
 
-        const htmlContent = generateHTMLContent(config);
-        
+    function updateConditionalFields() {
+        const rgb = rgbSelect.value;
+        const wantsRGB = rgb === 'moderate' || rgb === 'full';
+        toggle(strimerOption, wantsRGB);
+        toggle(rgbFanOption, wantsRGB);
+        if (!wantsRGB) {
+            document.getElementById('strimerCables').checked = false;
+            document.getElementById('rgbFans').checked = false;
+        }
+
+        const storage = storageSelect.value;
+        toggle(storageDetails, storage && storage !== 'none');
+    }
+
+    function toggle(el, show) {
+        el.classList.toggle('hidden', !show);
+    }
+
+    function generatePDF() {
+        const config = collectConfig();
         const element = document.createElement('div');
-        element.innerHTML = htmlContent;
+        element.innerHTML = renderPDF(config);
         document.body.appendChild(element);
 
-        const options = {
-            margin: 10,
-            filename: 'gaming-pc-config.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-        };
-
-        html2pdf().set(options).from(element).save().then(() => {
-            document.body.removeChild(element);
-        });
+        html2pdf()
+            .set({
+                margin: [12, 12, 12, 12],
+                filename: `pc-build-${new Date().toISOString().slice(0, 10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+            })
+            .from(element)
+            .save()
+            .then(() => document.body.removeChild(element));
     }
 
-    function generateHTMLContent(config) {
-        const purposeLabel = {
-            'gaming': 'Gaming',
-            'gaming-streaming': 'Gaming + Streaming',
-            'gaming-content': 'Gaming + Content Creation',
-            'general': 'General Use'
+    function collectConfig() {
+        const data = new FormData(form);
+        const get = (k) => data.get(k) || '';
+        const bool = (k) => data.get(k) === 'on' || data.get(k) === 'true';
+
+        return {
+            case: get('case'),
+            budget: get('budget'),
+            purpose: get('purpose'),
+            colorScheme: get('colorScheme'),
+            rgbPreference: get('rgbPreference'),
+            strimerCables: bool('strimerCables'),
+            wifiEnabled: bool('wifiEnabled'),
+            ethernet10gb: bool('ethernet10gb'),
+            overclockVRM: bool('overclockVRM'),
+            motherboardModel: get('motherboardModel'),
+            cpuBrand: get('cpuBrand'),
+            cpuModel: get('cpuModel'),
+            ramCapacity: get('ramCapacity'),
+            ramSpeed: get('ramSpeed'),
+            ramBrand: get('ramBrand'),
+            gpuBrand: get('gpuBrand'),
+            vram: get('vram'),
+            gpuModel: get('gpuModel'),
+            coolingType: get('coolingType'),
+            coolingBrand: get('coolingBrand'),
+            caseIntakeFans: get('caseIntakeFans'),
+            caseExhaustFans: get('caseExhaustFans'),
+            fanBrand: get('fanBrand'),
+            rgbFans: bool('rgbFans'),
+            ssdCapacity: get('ssdCapacity'),
+            additionalStorage: get('additionalStorage'),
+            additionalCapacity: get('additionalCapacity'),
+            psuWattage: get('psuWattage'),
+            psuBrand: get('psuBrand'),
+            psuModular: bool('psuModular'),
+            notes: get('notes'),
         };
-
-        const colorLabel = {
-            'white': 'White',
-            'black': 'Black',
-            'mixed': 'Black & White',
-            'other': 'Other'
-        };
-
-        const rgbLabel = {
-            'no': 'No RGB',
-            'minimal': 'Minimal RGB',
-            'moderate': 'Moderate RGB',
-            'full': 'Full RGB (Fans & AIO)'
-        };
-
-        const coolingLabel = {
-            'aio240': 'AIO Liquid (240mm)',
-            'aio280': 'AIO Liquid (280mm)',
-            'aio360': 'AIO Liquid (360mm)',
-            'air': 'Air Cooler (High-end)'
-        };
-
-        const storageLabel = {
-            'none': 'None',
-            'ssd-additional': 'Additional SSD',
-            'hdd-eco': 'HDD (Archival)',
-            'ssd-hdd': 'SSD + HDD'
-        };
-
-        const html = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                <h1 style="color: #667eea; text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 10px;">
-                    🖥️ Gaming PC Configuration
-                </h1>
-                <p style="text-align: center; color: #666; margin-bottom: 30px;">
-                    Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">System Overview</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Budget:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">$${config.budget}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Purpose:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${purposeLabel[config.purpose]}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Case:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.case}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Color Scheme:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${colorLabel[config.colorScheme]}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Aesthetics & RGB</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>RGB Lighting:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${rgbLabel[config.rgbPreference]}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>RGB Strimer Cables:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.strimerCables}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Motherboard</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Model:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.motherboardModel}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>WiFi:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.wifiEnabled}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>10GB Ethernet:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.ethernet10gb}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Overclocking Support (High VRM):</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.overclockVRM}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Processor (CPU)</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Brand Preference:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.cpuBrand}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Specific Model:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.cpuModel}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Memory (RAM)</h2>
-                    <p style="color: #666; font-style: italic; margin-bottom: 10px;">Recommended minimum: 6000MHz for DDR5</p>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Capacity:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.ramCapacity}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Speed:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.ramSpeed}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Brand Preference:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.ramBrand}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Graphics Card (GPU)</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Brand Preference:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.gpuBrand}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>VRAM Capacity:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.vram}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Specific Model:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.gpuModel}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Cooling Solution</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Type:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${coolingLabel[config.coolingType]}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Brand Preference:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.coolingBrand}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Storage</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Primary SSD:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.ssdCapacity}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Additional Storage:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${storageLabel[config.additionalStorage]}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Capacity:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.additionalCapacity}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Power Supply (PSU)</h2>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd; width: 40%;"><strong>Wattage:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.psuWattage}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Brand Preference:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.psuBrand}</td>
-                        </tr>
-                        <tr style="background: #fafafa;">
-                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Type:</strong></td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${config.psuModular}</td>
-                        </tr>
-                    </table>
-                </section>
-
-                <section style="margin-bottom: 25px;">
-                    <h2 style="background: #f0f0f0; padding: 10px; border-left: 4px solid #667eea;">Additional Notes</h2>
-                    <p style="padding: 10px; border: 1px solid #ddd; white-space: pre-wrap;">${config.notes}</p>
-                </section>
-
-                <section style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; border-radius: 4px;">
-                    <strong style="color: #0c5460;">📋 Cable Management Note:</strong>
-                    <p style="color: #0c5460; margin-top: 5px;">Your build will have presentable cable management with good organization and routing, though not at the level of a premium showcase or competitive modding setup.</p>
-                </section>
-
-                <footer style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd; color: #999; font-size: 0.9em;">
-                    <p>Gaming PC Configuration Builder | ${new Date().getFullYear()}</p>
-                </footer>
-            </div>
-        `;
-
-        return html;
     }
 });
+
+function escapeHTML(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function label(field, value) {
+    if (!value) return '—';
+    return LABELS[field]?.[value] || value;
+}
+
+function text(value, fallback = '—') {
+    const v = (value ?? '').toString().trim();
+    return v ? escapeHTML(v) : fallback;
+}
+
+function yesNo(value) {
+    return value ? 'Yes' : 'No';
+}
+
+function renderPDF(c) {
+    const date = new Date().toLocaleDateString('en-GB', {
+        year: 'numeric', month: 'long', day: 'numeric',
+    });
+
+    const sections = [
+        {
+            title: 'Overview',
+            rows: [
+                ['Purpose', label('purpose', c.purpose)],
+                ['Budget', c.budget ? `${escapeHTML(c.budget)} CHF` : '—'],
+                ['Case', text(c.case)],
+                ['Color scheme', label('colorScheme', c.colorScheme)],
+                ['RGB lighting', label('rgbPreference', c.rgbPreference)],
+                ['RGB Strimer cables', yesNo(c.strimerCables)],
+            ],
+        },
+        {
+            title: 'Motherboard',
+            rows: [
+                ['Model', text(c.motherboardModel)],
+                ['WiFi', yesNo(c.wifiEnabled)],
+                ['10GbE', yesNo(c.ethernet10gb)],
+                ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
+            ],
+        },
+        {
+            title: 'Processor',
+            rows: [
+                ['Brand', label('cpuBrand', c.cpuBrand)],
+                ['Model', text(c.cpuModel)],
+            ],
+        },
+        {
+            title: 'Memory',
+            rows: [
+                ['Capacity', label('ramCapacity', c.ramCapacity)],
+                ['Speed', label('ramSpeed', c.ramSpeed)],
+                ['Brand', text(c.ramBrand)],
+            ],
+        },
+        {
+            title: 'Graphics',
+            rows: [
+                ['Brand', label('gpuBrand', c.gpuBrand)],
+                ['VRAM', label('vram', c.vram)],
+                ['Model', text(c.gpuModel)],
+            ],
+        },
+        {
+            title: 'CPU cooling',
+            rows: [
+                ['Type', label('coolingType', c.coolingType)],
+                ['Model', text(c.coolingBrand)],
+            ],
+        },
+        {
+            title: 'Case fans',
+            rows: [
+                ['Intake', label('caseIntakeFans', c.caseIntakeFans)],
+                ['Exhaust', label('caseExhaustFans', c.caseExhaustFans)],
+                ['Model', text(c.fanBrand)],
+                ['RGB fans', yesNo(c.rgbFans)],
+            ],
+        },
+        {
+            title: 'Storage',
+            rows: [
+                ['Primary SSD', label('ssdCapacity', c.ssdCapacity)],
+                ['Additional', label('additionalStorage', c.additionalStorage)],
+                ...(c.additionalStorage && c.additionalStorage !== 'none'
+                    ? [['Additional capacity', text(c.additionalCapacity)]]
+                    : []),
+            ],
+        },
+        {
+            title: 'Power supply',
+            rows: [
+                ['Wattage', label('psuWattage', c.psuWattage)],
+                ['Brand', text(c.psuBrand)],
+                ['Fully modular', yesNo(c.psuModular)],
+            ],
+        },
+    ];
+
+    const sectionsHTML = sections.map(renderSection).join('');
+    const notesHTML = c.notes
+        ? `
+            <section class="block">
+                <h2>Notes</h2>
+                <p class="notes">${escapeHTML(c.notes)}</p>
+            </section>
+        `
+        : '';
+
+    return `
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 8mm; font-size: 11px; line-height: 1.5;">
+            <style>
+                .pdf-header { border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px; }
+                .pdf-title { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 4px; }
+                .pdf-subtitle { font-size: 11px; color: #6b6b6b; margin: 0; }
+                .block { margin-bottom: 20px; page-break-inside: avoid; }
+                .block h2 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6; }
+                .kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 16px; }
+                .k { color: #6b6b6b; font-size: 11px; }
+                .v { color: #0a0a0a; font-size: 11px; font-weight: 500; }
+                .notes { padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a; }
+                .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center; }
+            </style>
+
+            <div class="pdf-header">
+                <h1 class="pdf-title">PC Build Configuration</h1>
+                <p class="pdf-subtitle">Generated ${escapeHTML(date)}</p>
+            </div>
+
+            ${sectionsHTML}
+            ${notesHTML}
+
+            <div class="footer">Cable management: presentable routing, clean and organized — not a premium showcase build.</div>
+        </div>
+    `;
+}
+
+function renderSection({ title, rows }) {
+    const items = rows
+        .map(([k, v]) => `<div class="k">${escapeHTML(k)}</div><div class="v">${v}</div>`)
+        .join('');
+    return `
+        <section class="block">
+            <h2>${escapeHTML(title)}</h2>
+            <div class="kv">${items}</div>
+        </section>
+    `;
+}
