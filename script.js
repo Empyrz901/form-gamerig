@@ -275,25 +275,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generatePDF() {
+        if (typeof html2pdf === 'undefined') {
+            alert('PDF library failed to load. Check your internet connection and refresh.');
+            return;
+        }
+
         const config = collectConfig();
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'position:absolute; left:-10000px; top:0; width:794px; background:#ffffff;';
+        wrapper.style.cssText = 'width: 794px; background: #ffffff;';
         wrapper.innerHTML = renderPDF(config);
         document.body.appendChild(wrapper);
 
+        const cleanup = () => {
+            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+        };
+
         html2pdf()
             .set({
-                margin: [10, 10, 10, 10],
+                margin: 10,
                 filename: `pc-build-${new Date().toISOString().slice(0, 10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                html2canvas: { scale: 2, backgroundColor: '#ffffff', logging: false },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
-                pagebreak: { mode: ['css', 'legacy'] },
             })
             .from(wrapper)
             .save()
-            .then(() => document.body.removeChild(wrapper))
-            .catch(() => document.body.removeChild(wrapper));
+            .then(cleanup)
+            .catch((err) => {
+                cleanup();
+                console.error('PDF generation failed:', err);
+                alert('PDF generation failed: ' + (err && err.message ? err.message : err));
+            });
     }
 
     function collectConfig() {
