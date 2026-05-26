@@ -87,34 +87,90 @@ const LABELS = {
     },
 };
 
+// CPU TDP / PL2 (W). Used to bump PSU recommendation for power-hungry chips.
+const CPU_TDP_W = {
+    // Intel Core Ultra (LGA1851) — total package power approx
+    '285k': 250, '265k': 250, '265kf': 250, '245k': 159, '245kf': 159, '235': 159,
+    // Intel 14th / 13th gen
+    '14900k': 253, '14900kf': 253, '14900': 219, '14700k': 253, '14700kf': 253, '14700': 219,
+    '14600k': 181, '14600kf': 181, '14600': 154, '14500': 154, '14400': 148,
+    '13900k': 253, '13900ks': 253, '13700k': 253, '13600k': 181, '13500': 154, '13400': 148,
+    // AMD Ryzen 9000
+    '9950x3d': 170, '9950x': 170, '9900x3d': 120, '9900x': 120, '9800x3d': 120,
+    '9700x': 65, '9600x': 65,
+    // AMD Ryzen 7000
+    '7950x3d': 120, '7950x': 170, '7900x3d': 120, '7900x': 170, '7800x3d': 120,
+    '7700x': 105, '7700': 65, '7600x': 105, '7600': 65,
+};
+
+// Vendor-recommended PSU wattage per GPU. Already includes transient headroom.
+const GPU_PSU_REC = {
+    // NVIDIA RTX 50
+    '5090': 1000, '5080': 850, '5070 ti': 750, '5070': 650, '5060 ti': 600, '5060': 550,
+    // NVIDIA RTX 40
+    '4090': 1000, '4080 super': 850, '4080': 850,
+    '4070 ti super': 750, '4070 ti': 700, '4070 super': 700, '4070': 650,
+    '4060 ti': 600, '4060': 550,
+    // AMD RX 9000
+    '9070 xt': 850, '9070': 750, '9060 xt': 600, '9060': 550,
+    // AMD RX 7000
+    '7900 xtx': 800, '7900 xt': 750, '7800 xt': 700, '7700 xt': 700, '7600 xt': 600, '7600': 550,
+};
+
+function findInDB(modelText, db) {
+    if (!modelText) return { key: null, value: null };
+    const lc = modelText.toLowerCase();
+    let bestKey = null;
+    for (const key of Object.keys(db)) {
+        if (lc.includes(key) && (!bestKey || key.length > bestKey.length)) {
+            bestKey = key;
+        }
+    }
+    return bestKey ? { key: bestKey, value: db[bestKey] } : { key: null, value: null };
+}
+
+function recommendPSUWatts(cpuModel, gpuModel) {
+    const gpu = findInDB(gpuModel, GPU_PSU_REC);
+    const cpu = findInDB(cpuModel, CPU_TDP_W);
+    if (!gpu.value && !cpu.value) return null;
+    let watts = gpu.value || 650;
+    if (cpu.value && cpu.value >= 200) watts = Math.max(watts, (gpu.value || 600) + 100);
+    return { watts, gpu: gpu.key, cpu: cpu.key };
+}
+
+function parsePSUWatts(value) {
+    const m = (value || '').match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
 const GAMING_PRESET = {
-    case: 'NZXT H7 Flow (~100 CHF)',
-    budget: '1440',
+    case: 'NZXT H7 Flow 2024 (~133 CHF)',
+    budget: '1900',
     purpose: 'gaming',
     colorScheme: 'black',
     rgbPreference: 'minimal',
     wifiEnabled: true,
     overclockVRM: true,
-    motherboardModel: 'ASUS ROG STRIX B650E-E WiFi (~160 CHF)',
+    motherboardModel: 'ASUS ROG STRIX B650E-E WiFi (~287 CHF)',
     cpuBrand: 'amd',
-    cpuModel: 'AMD Ryzen 7 7800X3D (~250 CHF)',
+    cpuModel: 'AMD Ryzen 7 7800X3D (~447 CHF)',
     ramCapacity: '32gb',
     ramSpeed: '6000',
-    ramBrand: 'G.Skill / Corsair (~350 CHF)',
+    ramBrand: 'G.Skill / Corsair, 32GB DDR5-6000 (~330 CHF)',
     gpuBrand: 'amd',
     vram: '16gb',
-    gpuModel: 'AMD Radeon RX 9060 XT 16GB (~370 CHF)',
+    gpuModel: 'AMD Radeon RX 9060 XT 16GB (~420 CHF, varies by AIB)',
     coolingType: 'air-budget',
     coolingBrand: 'Thermalright Peerless Assassin 120 SE (~60 CHF)',
     caseIntakeFans: '2x120',
     caseExhaustFans: '1x120',
-    fanBrand: 'Arctic P12 PWM (~12 CHF each)',
+    fanBrand: 'Arctic P12 PWM (~7.50 CHF each)',
     ssdCapacity: '1tb',
     additionalStorage: 'none',
     psuWattage: '850w',
-    psuBrand: 'NZXT C850W ATX 3.1 (~110 CHF)',
+    psuBrand: 'NZXT C850 Gold ATX 3.1 (~130 CHF)',
     psuModular: true,
-    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler is sufficient and quiet. Approx. total: 1,440 CHF (excluding case fans).',
+    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,890 CHF on digitec (case 133 + board 287 + CPU 447 + RAM 330 + GPU 420 + cooler 60 + SSD 62 + PSU 130 + 3× fans 22).',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -129,22 +185,64 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         applyPreset(GAMING_PRESET);
         updateConditionalFields();
+        updatePSUWarning();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     window.resetForm = () => {
         form.reset();
         updateConditionalFields();
+        updatePSUWarning();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     rgbSelect.addEventListener('change', updateConditionalFields);
     storageSelect.addEventListener('change', updateConditionalFields);
 
+    const psuWattageSelect = document.getElementById('psuWattage');
+    const cpuModelInput = document.getElementById('cpuModel');
+    const gpuModelInput = document.getElementById('gpuModel');
+    const psuWarning = document.getElementById('psuWarning');
+
+    [cpuModelInput, gpuModelInput, psuWattageSelect].forEach((el) => {
+        el.addEventListener('input', updatePSUWarning);
+        el.addEventListener('change', updatePSUWarning);
+    });
+
+    function updatePSUWarning() {
+        const rec = recommendPSUWatts(cpuModelInput.value, gpuModelInput.value);
+        const selected = parsePSUWatts(psuWattageSelect.value);
+
+        if (!rec) {
+            psuWarning.classList.add('hidden');
+            psuWarning.textContent = '';
+            return;
+        }
+
+        if (!selected) {
+            psuWarning.classList.remove('hidden');
+            psuWarning.className = 'info-box';
+            psuWarning.textContent = `Recommended PSU: ${rec.watts}W or higher (based on your CPU/GPU).`;
+            return;
+        }
+
+        if (selected < rec.watts) {
+            psuWarning.classList.remove('hidden');
+            psuWarning.className = 'warning';
+            psuWarning.textContent = `Heads up: ${selected}W may be insufficient. Recommended ${rec.watts}W+ for this CPU/GPU combo.`;
+        } else {
+            psuWarning.classList.remove('hidden');
+            psuWarning.className = 'info-box info-box-ok';
+            psuWarning.textContent = `${selected}W is sufficient (recommended ${rec.watts}W+).`;
+        }
+    }
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         generatePDF();
     });
+
+    updatePSUWarning();
 
     function applyPreset(preset) {
         for (const [key, value] of Object.entries(preset)) {
@@ -178,22 +276,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generatePDF() {
         const config = collectConfig();
-        const element = document.createElement('div');
-        element.innerHTML = renderPDF(config);
-        document.body.appendChild(element);
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:absolute; left:-10000px; top:0; width:794px; background:#ffffff;';
+        wrapper.innerHTML = renderPDF(config);
+        document.body.appendChild(wrapper);
 
         html2pdf()
             .set({
-                margin: [12, 12, 12, 12],
+                margin: [10, 10, 10, 10],
                 filename: `pc-build-${new Date().toISOString().slice(0, 10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+                pagebreak: { mode: ['css', 'legacy'] },
             })
-            .from(element)
+            .from(wrapper)
             .save()
-            .then(() => document.body.removeChild(element));
+            .then(() => document.body.removeChild(wrapper))
+            .catch(() => document.body.removeChild(wrapper));
     }
 
     function collectConfig() {
@@ -348,49 +448,43 @@ function renderPDF(c) {
     const sectionsHTML = sections.map(renderSection).join('');
     const notesHTML = c.notes
         ? `
-            <section class="block">
-                <h2>Notes</h2>
-                <p class="notes">${escapeHTML(c.notes)}</p>
-            </section>
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">Notes</div>
+                <div style="padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a;">${escapeHTML(c.notes)}</div>
+            </div>
         `
         : '';
 
     return `
-        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 8mm; font-size: 11px; line-height: 1.5;">
-            <style>
-                .pdf-header { border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px; }
-                .pdf-title { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 4px; }
-                .pdf-subtitle { font-size: 11px; color: #6b6b6b; margin: 0; }
-                .block { margin-bottom: 20px; page-break-inside: avoid; }
-                .block h2 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6; }
-                .kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 16px; }
-                .k { color: #6b6b6b; font-size: 11px; }
-                .v { color: #0a0a0a; font-size: 11px; font-weight: 500; }
-                .notes { padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a; }
-                .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center; }
-            </style>
-
-            <div class="pdf-header">
-                <h1 class="pdf-title">PC Build Configuration</h1>
-                <p class="pdf-subtitle">Generated ${escapeHTML(date)}</p>
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 24px 28px; font-size: 11px; line-height: 1.5; background: #ffffff; box-sizing: border-box;">
+            <div style="border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px;">
+                <div style="font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 4px 0; color: #0a0a0a;">PC Build Configuration</div>
+                <div style="font-size: 11px; color: #6b6b6b; margin: 0;">Generated ${escapeHTML(date)}</div>
             </div>
 
             ${sectionsHTML}
             ${notesHTML}
 
-            <div class="footer">Cable management: presentable routing, clean and organized — not a premium showcase build.</div>
+            <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center;">Cable management: presentable routing, clean and organized — not a premium showcase build.</div>
         </div>
     `;
 }
 
 function renderSection({ title, rows }) {
     const items = rows
-        .map(([k, v]) => `<div class="k">${escapeHTML(k)}</div><div class="v">${v}</div>`)
+        .map(([k, v]) => `
+            <tr>
+                <td style="padding: 5px 0; color: #6b6b6b; font-size: 11px; width: 35%; vertical-align: top;">${escapeHTML(k)}</td>
+                <td style="padding: 5px 0; color: #0a0a0a; font-size: 11px; font-weight: 500; vertical-align: top;">${v}</td>
+            </tr>
+        `)
         .join('');
     return `
-        <section class="block">
-            <h2>${escapeHTML(title)}</h2>
-            <div class="kv">${items}</div>
-        </section>
+        <div style="margin-bottom: 20px; page-break-inside: avoid;">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">${escapeHTML(title)}</div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody>${items}</tbody>
+            </table>
+        </div>
     `;
 }
