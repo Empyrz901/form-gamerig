@@ -124,6 +124,12 @@ const LABELS = {
         '1000w': '1000W',
         '1200w': '1200W+',
     },
+    usbPortsNeeded: {
+        '4': '4 ports',
+        '6': '6 ports',
+        '8': '8 ports',
+        '10-plus': '10+ ports',
+    },
 };
 
 // CPU TDP / PL2 (W). Used to bump PSU recommendation for power-hungry chips.
@@ -262,6 +268,7 @@ const GAMING_PRESET = {
     colorScheme: 'standard',
     rgbPreference: 'minimal',
     motherboardPreference: 'specific',
+    usbPortsNeeded: '8',
     wifiEnabled: true,
     overclockVRM: true,
     motherboardModel: 'ROG STRIX B650E-F GAMING WIFI (~170 CHF)',
@@ -520,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rgbPreference: get('rgbPreference'),
             strimerCables: bool('strimerCables'),
             motherboardPreference: get('motherboardPreference'),
+            usbPortsNeeded: get('usbPortsNeeded'),
             wifiEnabled: bool('wifiEnabled'),
             ethernet10gb: bool('ethernet10gb'),
             overclockVRM: bool('overclockVRM'),
@@ -608,6 +616,7 @@ function preferenceSections(c) {
             rows: [
                 ['Preference', label('motherboardPreference', c.motherboardPreference)],
                 ['Model', plainText(c.motherboardModel)],
+                ['USB ports needed', label('usbPortsNeeded', c.usbPortsNeeded)],
                 ['WiFi', yesNo(c.wifiEnabled)],
                 ['10 Gigabit Ethernet', yesNo(c.ethernet10gb)],
                 ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
