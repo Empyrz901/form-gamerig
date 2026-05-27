@@ -199,6 +199,7 @@ const KNOWN_CASE_FORM_FACTORS = {
 
 const KNOWN_MOTHERBOARD_FORM_FACTORS = {
     'asus rog strix b650e-e': 'atx',
+    'tuf gaming b650e-e': 'atx',
     'b650e-e': 'atx',
 };
 
@@ -259,18 +260,18 @@ const GAMING_PRESET = {
     motherboardPreference: 'specific',
     wifiEnabled: true,
     overclockVRM: true,
-    motherboardModel: 'ASUS ROG STRIX B650E-E WiFi (~287 CHF)',
+    motherboardModel: 'TUF GAMING B650E-E WiFi (~145 CHF)',
     cpuPreference: 'specific',
     cpuBrand: 'amd',
-    cpuModel: 'AMD Ryzen 7 7800X3D (~447 CHF)',
+    cpuModel: 'AMD Ryzen 7 7800X3D (~234 CHF)',
     ramPreference: 'specific',
     ramCapacity: '32gb',
     ramSpeed: '6000',
-    ramBrand: 'G.Skill / Corsair, 32GB DDR5-6000 (~330 CHF)',
+    ramBrand: 'G.Skill / Corsair, 32GB DDR5-6000 (~340 CHF)',
     gpuPreference: 'specific',
     gpuBrand: 'amd',
     vram: '16gb',
-    gpuModel: 'AMD Radeon RX 9060 XT 16GB (~420 CHF, varies by AIB)',
+    gpuModel: 'AMD Radeon RX 9060 XT 16GB (~365 CHF, varies by AIB)',
     coolingPreference: 'specific',
     coolingType: 'air-budget',
     coolingBrand: 'Thermalright Peerless Assassin 120 SE (~60 CHF)',
@@ -282,9 +283,9 @@ const GAMING_PRESET = {
     ssdCapacity: '1tb',
     additionalStorage: 'none',
     psuWattage: '850w',
-    psuBrand: 'NZXT C850 Gold ATX 3.1 (~130 CHF)',
+    psuBrand: 'NZXT C850 Gold ATX 3.1 (~100 CHF)',
     psuModular: true,
-    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,890 CHF on digitec (case 133 + board 287 + CPU 447 + RAM 330 + GPU 420 + cooler 60 + SSD 62 + PSU 130 + 3x fans 22).',
+    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,500 CHF without DRAM cache SSD, or ~1,555 CHF with a DRAM cache NVMe SSD (case 133 + board 145 + CPU 234 + RAM 340 + GPU 365 + cooler 60 + SSD 100/155 + PSU 100 + 3x fans 22).',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
