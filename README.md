@@ -51,7 +51,7 @@ A beautiful, interactive web form for designing and configuring gaming PCs. Fill
 ## Form Sections Explained
 
 ### Motherboard Recommendations
-- **Recommended**: TUF GAMING B650E-E WIFI (best price/quality ratio)
+- **Recommended**: ASUS TUF B650E-E WIFI (best price/quality ratio)
 - Supports WiFi, 10GB Ethernet, and high-end VRM for overclocking
 
 ### RAM

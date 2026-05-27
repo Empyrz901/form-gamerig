@@ -199,6 +199,7 @@ const KNOWN_CASE_FORM_FACTORS = {
 
 const KNOWN_MOTHERBOARD_FORM_FACTORS = {
     'asus rog strix b650e-e': 'atx',
+    'asus tuf b650e-e': 'atx',
     'tuf gaming b650e-e': 'atx',
     'b650e-e': 'atx',
 };
@@ -260,7 +261,7 @@ const GAMING_PRESET = {
     motherboardPreference: 'specific',
     wifiEnabled: true,
     overclockVRM: true,
-    motherboardModel: 'TUF GAMING B650E-E WiFi (~145 CHF)',
+    motherboardModel: 'ASUS TUF B650E-E WiFi (~145 CHF)',
     cpuPreference: 'specific',
     cpuBrand: 'amd',
     cpuModel: 'AMD Ryzen 7 7800X3D (~234 CHF)',
