@@ -6,16 +6,29 @@ const LABELS = {
         'general': 'General use',
     },
     colorScheme: {
-        'white': 'White',
+        'standard': 'Standard / best value',
+        'white-only': 'White only',
         'black': 'Black',
         'mixed': 'Black & white',
-        'other': 'Other',
+    },
+    casePreference: {
+        'no-preference': 'No preference',
+        'specific': 'Specific case reference',
+    },
+    motherboardPreference: {
+        'no-preference': 'No preference',
+        'specific': 'Specific motherboard reference',
+    },
+    cpuPreference: {
+        'no-preference': 'No preference / best value',
+        'brand': 'Brand preference only',
+        'specific': 'Specific model',
     },
     rgbPreference: {
-        'no': 'None',
-        'minimal': 'Minimal',
-        'moderate': 'Moderate',
-        'full': 'Full (fans & AIO)',
+        'no': 'No RGB',
+        'minimal': 'Minimal RGB',
+        'moderate': 'Moderate RGB',
+        'full': 'Full RGB',
     },
     cpuBrand: {
         'intel': 'Intel',
@@ -26,6 +39,21 @@ const LABELS = {
         'nvidia': 'NVIDIA',
         'amd': 'AMD',
         'no-preference': 'No preference',
+    },
+    gpuPreference: {
+        'no-preference': 'No preference / best value',
+        'brand': 'Brand preference only',
+        'specific': 'Specific model',
+    },
+    ramPreference: {
+        'no-preference': 'No preference',
+        'specific': 'Specific capacity',
+    },
+    coolingPreference: {
+        'no-preference': 'No preference / best fit',
+        'air': 'Ventirad / air cooler',
+        'aio': 'AIO liquid cooler',
+        'specific': 'Specific cooler model',
     },
     coolingType: {
         'air-budget': 'Air — budget',
@@ -66,6 +94,15 @@ const LABELS = {
         '1x140': '1× 140mm (rear)',
         '2x120': '2× 120mm (top)',
         '1x120-1x140': '1× 120mm rear + 1× 140mm top',
+    },
+    fanPreference: {
+        'no-preference': 'No preference / builder decides',
+        'stock': 'Stock fans only',
+        'specific': 'Specific fan layout',
+    },
+    storagePreference: {
+        'no-preference': 'No preference',
+        'specific': 'Specific SSD capacity',
     },
     ssdCapacity: {
         '500gb': '500GB',
@@ -212,26 +249,34 @@ function getMotherboardCompatibility(caseText, motherboardText) {
 
 const GAMING_PRESET = {
     case: 'NZXT H7 Flow 2024 (~133 CHF)',
+    casePreference: 'specific',
     budget: '1900',
     purpose: 'gaming',
-    colorScheme: 'black',
+    colorScheme: 'standard',
     rgbPreference: 'minimal',
+    motherboardPreference: 'specific',
     wifiEnabled: true,
     overclockVRM: true,
     motherboardModel: 'ASUS ROG STRIX B650E-E WiFi (~287 CHF)',
+    cpuPreference: 'specific',
     cpuBrand: 'amd',
     cpuModel: 'AMD Ryzen 7 7800X3D (~447 CHF)',
+    ramPreference: 'specific',
     ramCapacity: '32gb',
     ramSpeed: '6000',
     ramBrand: 'G.Skill / Corsair, 32GB DDR5-6000 (~330 CHF)',
+    gpuPreference: 'specific',
     gpuBrand: 'amd',
     vram: '16gb',
     gpuModel: 'AMD Radeon RX 9060 XT 16GB (~420 CHF, varies by AIB)',
+    coolingPreference: 'specific',
     coolingType: 'air-budget',
     coolingBrand: 'Thermalright Peerless Assassin 120 SE (~60 CHF)',
+    fanPreference: 'specific',
     caseIntakeFans: '2x120',
     caseExhaustFans: '1x120',
     fanBrand: 'Arctic P12 PWM (~7.50 CHF each)',
+    storagePreference: 'specific',
     ssdCapacity: '1tb',
     additionalStorage: 'none',
     psuWattage: '850w',
@@ -245,8 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rgbSelect = document.getElementById('rgbPreference');
     const strimerOption = document.getElementById('strimerOption');
     const rgbFanOption = document.getElementById('rgbFanOption');
-    const storageSelect = document.getElementById('additionalStorage');
-    const storageDetails = document.getElementById('additionalStorageDetails');
+    const preferenceControls = Array.from(document.querySelectorAll('[data-preference-control]'));
 
     window.loadPresetGaming = () => {
         form.reset();
@@ -266,7 +310,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     rgbSelect.addEventListener('change', updateConditionalFields);
-    storageSelect.addEventListener('change', updateConditionalFields);
+    preferenceControls.forEach((el) => {
+        el.addEventListener('change', updateConditionalFields);
+    });
     form.addEventListener('reset', () => {
         setTimeout(() => {
             updateConditionalFields();
@@ -395,12 +441,38 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rgbFans').checked = false;
         }
 
-        const storage = storageSelect.value;
-        toggle(storageDetails, storage && storage !== 'none');
+        preferenceControls.forEach((control) => {
+            const target = document.getElementById(control.dataset.preferenceControl);
+            if (!target) return;
+            const show = shouldShowPreferenceDetails(control);
+            toggle(target, show);
+            if (!show) clearFormControls(target);
+        });
+        updateMotherboardCompatibility();
+        updatePSUWarning();
     }
 
     function toggle(el, show) {
         el.classList.toggle('hidden', !show);
+    }
+
+    function shouldShowPreferenceDetails(control) {
+        if (control.id === 'additionalStorage') {
+            return Boolean(control.value && control.value !== 'none');
+        }
+        return Boolean(control.value && control.value !== 'no-preference' && control.value !== 'stock');
+    }
+
+    function clearFormControls(root) {
+        root.querySelectorAll('input, select, textarea').forEach((el) => {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else {
+                el.value = '';
+            }
+            el.setCustomValidity('');
+            el.classList.remove('field-error');
+        });
     }
 
     async function generatePDF() {
@@ -420,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'pointer-events: none',
             'z-index: 2147483647',
         ].join('; ');
-        wrapper.innerHTML = renderPDF(config);
+        wrapper.innerHTML = renderPreferencePDF(config);
         document.body.appendChild(wrapper);
 
         if (document.fonts && document.fonts.ready) {
@@ -466,29 +538,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             case: get('case'),
+            casePreference: get('casePreference'),
             budget: get('budget'),
             purpose: get('purpose'),
             colorScheme: get('colorScheme'),
             rgbPreference: get('rgbPreference'),
             strimerCables: bool('strimerCables'),
+            motherboardPreference: get('motherboardPreference'),
             wifiEnabled: bool('wifiEnabled'),
             ethernet10gb: bool('ethernet10gb'),
             overclockVRM: bool('overclockVRM'),
             motherboardModel: get('motherboardModel'),
+            cpuPreference: get('cpuPreference'),
             cpuBrand: get('cpuBrand'),
             cpuModel: get('cpuModel'),
+            ramPreference: get('ramPreference'),
             ramCapacity: get('ramCapacity'),
             ramSpeed: get('ramSpeed'),
             ramBrand: get('ramBrand'),
+            gpuPreference: get('gpuPreference'),
             gpuBrand: get('gpuBrand'),
             vram: get('vram'),
             gpuModel: get('gpuModel'),
+            coolingPreference: get('coolingPreference'),
             coolingType: get('coolingType'),
             coolingBrand: get('coolingBrand'),
+            fanPreference: get('fanPreference'),
             caseIntakeFans: get('caseIntakeFans'),
             caseExhaustFans: get('caseExhaustFans'),
             fanBrand: get('fanBrand'),
             rgbFans: bool('rgbFans'),
+            storagePreference: get('storagePreference'),
             ssdCapacity: get('ssdCapacity'),
             additionalStorage: get('additionalStorage'),
             additionalCapacity: get('additionalCapacity'),
@@ -629,6 +709,129 @@ function renderPDF(c) {
             ${notesHTML}
 
             <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center;">Cable management: presentable routing, clean and organized — not a premium showcase build.</div>
+        </div>
+    `;
+}
+
+function renderPreferencePDF(c) {
+    const date = new Date().toLocaleDateString('en-GB', {
+        year: 'numeric', month: 'long', day: 'numeric',
+    });
+
+    const sections = [
+        {
+            title: 'Overview',
+            rows: [
+                ['Purpose', label('purpose', c.purpose)],
+                ['Budget', c.budget ? `${escapeHTML(c.budget)} CHF` : '—'],
+                ['Configuration style', label('colorScheme', c.colorScheme)],
+                ['RGB preference', label('rgbPreference', c.rgbPreference)],
+            ],
+        },
+        {
+            title: 'Case & look',
+            rows: [
+                ['Case preference', label('casePreference', c.casePreference)],
+                ['Case', text(c.case)],
+                ['RGB Strimer cables', yesNo(c.strimerCables)],
+            ],
+        },
+        {
+            title: 'Motherboard',
+            rows: [
+                ['Preference', label('motherboardPreference', c.motherboardPreference)],
+                ['Model', text(c.motherboardModel)],
+                ['WiFi', yesNo(c.wifiEnabled)],
+                ['10GbE', yesNo(c.ethernet10gb)],
+                ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
+            ],
+        },
+        {
+            title: 'Processor',
+            rows: [
+                ['Preference', label('cpuPreference', c.cpuPreference)],
+                ['Brand', label('cpuBrand', c.cpuBrand)],
+                ['Model', text(c.cpuModel)],
+            ],
+        },
+        {
+            title: 'Memory',
+            rows: [
+                ['Preference', label('ramPreference', c.ramPreference)],
+                ['Capacity', label('ramCapacity', c.ramCapacity)],
+                ['Speed', label('ramSpeed', c.ramSpeed)],
+                ['Brand', text(c.ramBrand)],
+            ],
+        },
+        {
+            title: 'Graphics',
+            rows: [
+                ['Preference', label('gpuPreference', c.gpuPreference)],
+                ['Brand', label('gpuBrand', c.gpuBrand)],
+                ['VRAM', label('vram', c.vram)],
+                ['Model', text(c.gpuModel)],
+            ],
+        },
+        {
+            title: 'CPU cooling',
+            rows: [
+                ['Preference', label('coolingPreference', c.coolingPreference)],
+                ['Type', label('coolingType', c.coolingType)],
+                ['Model', text(c.coolingBrand)],
+            ],
+        },
+        {
+            title: 'Case fans',
+            rows: [
+                ['Preference', label('fanPreference', c.fanPreference)],
+                ['Intake', label('caseIntakeFans', c.caseIntakeFans)],
+                ['Exhaust', label('caseExhaustFans', c.caseExhaustFans)],
+                ['Model', text(c.fanBrand)],
+                ['RGB fans', yesNo(c.rgbFans)],
+            ],
+        },
+        {
+            title: 'Storage',
+            rows: [
+                ['Preference', label('storagePreference', c.storagePreference)],
+                ['Primary SSD', label('ssdCapacity', c.ssdCapacity)],
+                ['Additional', label('additionalStorage', c.additionalStorage)],
+                ...(c.additionalStorage && c.additionalStorage !== 'none'
+                    ? [['Additional capacity', text(c.additionalCapacity)]]
+                    : []),
+            ],
+        },
+        {
+            title: 'Power supply',
+            rows: [
+                ['Wattage', label('psuWattage', c.psuWattage)],
+                ['Brand', text(c.psuBrand)],
+                ['Fully modular', yesNo(c.psuModular)],
+            ],
+        },
+    ];
+
+    const sectionsHTML = sections.map(renderSection).join('');
+    const notesHTML = c.notes
+        ? `
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">Notes</div>
+                <div style="padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a;">${escapeHTML(c.notes)}</div>
+            </div>
+        `
+        : '';
+
+    return `
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 24px 28px; font-size: 11px; line-height: 1.5; background: #ffffff; box-sizing: border-box;">
+            <div style="border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px;">
+                <div style="font-size: 22px; font-weight: 600; margin: 0 0 4px 0; color: #0a0a0a;">PC Build Configuration</div>
+                <div style="font-size: 11px; color: #6b6b6b; margin: 0;">Generated ${escapeHTML(date)}</div>
+            </div>
+
+            ${sectionsHTML}
+            ${notesHTML}
+
+            <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center;">Cable management: presentable routing, clean and organized - not premium showcase level.</div>
         </div>
     `;
 }

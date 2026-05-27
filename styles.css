@@ -150,6 +150,16 @@ header p {
     margin-bottom: 0;
 }
 
+.compact-row {
+    align-items: center;
+}
+
+.preference-details {
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+    margin: 4px 0 18px;
+}
+
 label {
     display: block;
     font-size: 13px;
