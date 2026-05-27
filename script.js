@@ -143,6 +143,73 @@ function parsePSUWatts(value) {
     return m ? parseInt(m[1], 10) : null;
 }
 
+const FORM_FACTORS = {
+    itx: { label: 'Mini-ITX', rank: 1 },
+    matx: { label: 'Micro-ATX', rank: 2 },
+    atx: { label: 'ATX', rank: 3 },
+    eatx: { label: 'E-ATX', rank: 4 },
+};
+
+const KNOWN_CASE_FORM_FACTORS = {
+    'fractal core 1000': 'matx',
+    'nzxt h7 flow': 'atx',
+    'corsair 4000d': 'atx',
+    'lian li o11 dynamic': 'atx',
+    'fractal north': 'atx',
+};
+
+const KNOWN_MOTHERBOARD_FORM_FACTORS = {
+    'asus rog strix b650e-e': 'atx',
+    'b650e-e': 'atx',
+};
+
+function normalizeFormFactorText(value) {
+    return (value || '')
+        .toLowerCase()
+        .replace(/[×x]/g, 'x')
+        .replace(/[_/]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findKnownFormFactor(value, db) {
+    const text = normalizeFormFactorText(value);
+    let bestKey = null;
+    for (const key of Object.keys(db)) {
+        if (text.includes(key) && (!bestKey || key.length > bestKey.length)) {
+            bestKey = key;
+        }
+    }
+    return bestKey ? db[bestKey] : null;
+}
+
+function inferFormFactor(value, knownModels = {}) {
+    const known = findKnownFormFactor(value, knownModels);
+    if (known) return known;
+
+    const text = normalizeFormFactorText(value);
+    if (!text) return null;
+
+    if (/(?:^|\b)(?:e\s*-?\s*atx|eatx|extended\s+atx)(?:\b|$)/i.test(text)) return 'eatx';
+    if (/(?:^|\b)(?:micro\s*-?\s*atx|m\s*-?\s*atx|matx|u\s*-?\s*atx|uatx|µ\s*-?\s*atx)(?:\b|$)/i.test(text)) return 'matx';
+    if (/(?:^|\b)(?:mini\s*-?\s*itx|m\s*-?\s*itx|itx)(?:\b|$)/i.test(text)) return 'itx';
+    if (/(?:^|\b)atx(?:\b|$)/i.test(text)) return 'atx';
+
+    return null;
+}
+
+function getMotherboardCompatibility(caseText, motherboardText) {
+    const caseFactor = inferFormFactor(caseText, KNOWN_CASE_FORM_FACTORS);
+    const motherboardFactor = inferFormFactor(motherboardText, KNOWN_MOTHERBOARD_FORM_FACTORS);
+
+    if (!caseFactor || !motherboardFactor) {
+        return { status: 'unknown', caseFactor, motherboardFactor };
+    }
+
+    const fits = FORM_FACTORS[motherboardFactor].rank <= FORM_FACTORS[caseFactor].rank;
+    return { status: fits ? 'ok' : 'invalid', caseFactor, motherboardFactor };
+}
+
 const GAMING_PRESET = {
     case: 'NZXT H7 Flow 2024 (~133 CHF)',
     budget: '1900',
@@ -186,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyPreset(GAMING_PRESET);
         updateConditionalFields();
         updatePSUWarning();
+        updateMotherboardCompatibility();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -193,21 +261,77 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         updateConditionalFields();
         updatePSUWarning();
+        updateMotherboardCompatibility();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     rgbSelect.addEventListener('change', updateConditionalFields);
     storageSelect.addEventListener('change', updateConditionalFields);
+    form.addEventListener('reset', () => {
+        setTimeout(() => {
+            updateConditionalFields();
+            updatePSUWarning();
+            updateMotherboardCompatibility();
+        }, 0);
+    });
 
     const psuWattageSelect = document.getElementById('psuWattage');
     const cpuModelInput = document.getElementById('cpuModel');
     const gpuModelInput = document.getElementById('gpuModel');
     const psuWarning = document.getElementById('psuWarning');
+    const caseInput = document.getElementById('case');
+    const motherboardModelInput = document.getElementById('motherboardModel');
+    const motherboardCompatibility = document.getElementById('motherboardCompatibility');
 
     [cpuModelInput, gpuModelInput, psuWattageSelect].forEach((el) => {
         el.addEventListener('input', updatePSUWarning);
         el.addEventListener('change', updatePSUWarning);
     });
+
+    [caseInput, motherboardModelInput].forEach((el) => {
+        el.addEventListener('input', updateMotherboardCompatibility);
+        el.addEventListener('change', updateMotherboardCompatibility);
+    });
+
+    function updateMotherboardCompatibility() {
+        const result = getMotherboardCompatibility(caseInput.value, motherboardModelInput.value);
+        motherboardModelInput.setCustomValidity('');
+        motherboardModelInput.classList.remove('field-error');
+        motherboardCompatibility.className = 'hidden';
+        motherboardCompatibility.textContent = '';
+
+        if (!caseInput.value.trim() || !motherboardModelInput.value.trim()) {
+            return true;
+        }
+
+        if (result.status === 'unknown') {
+            const knownParts = [];
+            if (result.caseFactor) knownParts.push(`case: ${FORM_FACTORS[result.caseFactor].label}`);
+            if (result.motherboardFactor) knownParts.push(`board: ${FORM_FACTORS[result.motherboardFactor].label}`);
+
+            motherboardCompatibility.className = 'info-box';
+            motherboardCompatibility.textContent = knownParts.length
+                ? `Detected ${knownParts.join(', ')}. Add the missing form factor if you want a fit check.`
+                : 'Add a form factor such as ATX, mATX, or Mini-ITX to either field to check motherboard fit.';
+            return true;
+        }
+
+        const caseLabel = FORM_FACTORS[result.caseFactor].label;
+        const boardLabel = FORM_FACTORS[result.motherboardFactor].label;
+
+        if (result.status === 'invalid') {
+            const message = `${boardLabel} motherboards do not fit in a ${caseLabel} case. Choose a ${caseLabel} or smaller board, or a larger case.`;
+            motherboardModelInput.setCustomValidity(message);
+            motherboardModelInput.classList.add('field-error');
+            motherboardCompatibility.className = 'warning';
+            motherboardCompatibility.textContent = message;
+            return false;
+        }
+
+        motherboardCompatibility.className = 'info-box info-box-ok';
+        motherboardCompatibility.textContent = `${boardLabel} motherboard fits in a ${caseLabel} case.`;
+        return true;
+    }
 
     function updatePSUWarning() {
         const rec = recommendPSUWatts(cpuModelInput.value, gpuModelInput.value);
@@ -239,10 +363,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (!updateMotherboardCompatibility() || !form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         generatePDF();
     });
 
     updatePSUWarning();
+    updateMotherboardCompatibility();
 
     function applyPreset(preset) {
         for (const [key, value] of Object.entries(preset)) {
@@ -274,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el.classList.toggle('hidden', !show);
     }
 
-    function generatePDF() {
+    async function generatePDF() {
         if (typeof html2pdf === 'undefined') {
             alert('PDF library failed to load. Check your internet connection and refresh.');
             return;
@@ -282,9 +411,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const config = collectConfig();
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'width: 794px; background: #ffffff;';
+        wrapper.style.cssText = [
+            'position: fixed',
+            'left: 0',
+            'top: 0',
+            'width: 794px',
+            'background: #ffffff',
+            'pointer-events: none',
+            'z-index: 2147483647',
+        ].join('; ');
         wrapper.innerHTML = renderPDF(config);
         document.body.appendChild(wrapper);
+
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+
+        await new Promise((resolve) => requestAnimationFrame(resolve));
 
         const cleanup = () => {
             if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
@@ -295,7 +438,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin: 10,
                 filename: `pc-build-${new Date().toISOString().slice(0, 10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, backgroundColor: '#ffffff', logging: false },
+                html2canvas: {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: 794,
+                    windowHeight: wrapper.scrollHeight,
+                },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
             })
             .from(wrapper)
