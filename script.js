@@ -262,7 +262,7 @@ function getMotherboardCompatibility(caseText, motherboardText) {
 const GAMING_PRESET = {
     case: 'NZXT H7 Flow 2024 (~133 CHF)',
     casePreference: 'specific',
-    budget: '1900',
+    budget: '1580',
     purpose: 'gaming',
     setupPurpose: '1440p gaming with strong value parts and quiet daily use',
     colorScheme: 'standard',
