@@ -619,7 +619,7 @@ function preferenceSections(c) {
                 ['USB ports needed', label('usbPortsNeeded', c.usbPortsNeeded)],
                 ['WiFi', yesNo(c.wifiEnabled)],
                 ['10 Gigabit Ethernet', yesNo(c.ethernet10gb)],
-                ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
+                ['Strong CPU power delivery', yesNo(c.overclockVRM)],
             ],
         },
         {

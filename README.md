@@ -52,7 +52,7 @@ A beautiful, interactive web form for designing and configuring gaming PCs. Fill
 
 ### Motherboard Recommendations
 - **Recommended**: ROG STRIX B650E-F GAMING WIFI (best price/quality ratio)
-- Supports WiFi, 10GB Ethernet, and high-end VRM for overclocking
+- Supports WiFi, 10GB Ethernet, and strong CPU power delivery for high-load CPUs or overclocking
 
 ### RAM
 - Minimum recommended: **6000MHz DDR5**
