@@ -294,7 +294,7 @@ const GAMING_PRESET = {
     ssdCapacity: '1tb',
     additionalStorage: 'none',
     psuWattage: '850w',
-    psuBrand: 'NZXT C850 Gold ATX 3.1 (~100 CHF)',
+    psuBrand: 'NZXT C850 Gold ATX 3.1 fully modular (~100 CHF)',
     psuModular: true,
     notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,525 CHF without DRAM cache SSD, or ~1,580 CHF with a DRAM cache NVMe SSD (case 133 + board 170 + CPU 234 + RAM 340 + GPU 365 + cooler 60 + SSD 100/155 + PSU 100 + 3x fans 22).',
 };
