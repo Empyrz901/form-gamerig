@@ -207,8 +207,11 @@ const KNOWN_MOTHERBOARD_FORM_FACTORS = {
     'asus rog strix b650e-e': 'atx',
     'rog strix b650e-f': 'atx',
     'asus rog strix b650e-f': 'atx',
+    'rog strix x870e-e': 'atx',
+    'asus rog strix x870e-e': 'atx',
     'asus tuf b650e-e': 'atx',
     'tuf gaming b650e-e': 'atx',
+    'x870e-e': 'atx',
     'b650e-f': 'atx',
     'b650e-e': 'atx',
 };
@@ -299,6 +302,78 @@ const GAMING_PRESET = {
     notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,525 CHF without DRAM cache SSD, or ~1,580 CHF with a DRAM cache NVMe SSD (case 133 + board 170 + CPU 234 + RAM 340 + GPU 365 + cooler 60 + SSD 100/155 + PSU 100 + 3x fans 22).',
 };
 
+const STREAMING_PRESET = {
+    case: '',
+    casePreference: 'no-preference',
+    budget: '2650',
+    purpose: 'gaming-streaming',
+    setupPurpose: 'High-resolution gaming, streaming, OBS overlays, browser tabs, and light video editing',
+    colorScheme: 'standard',
+    rgbPreference: 'minimal',
+    motherboardPreference: 'specific',
+    usbPortsNeeded: '8',
+    wifiEnabled: true,
+    overclockVRM: true,
+    motherboardModel: 'ROG STRIX B650E-F GAMING WIFI (~170 CHF)',
+    cpuPreference: 'specific',
+    cpuBrand: 'amd',
+    cpuModel: 'AMD Ryzen 7 9800X3D',
+    ramPreference: 'specific',
+    ramCapacity: '64gb',
+    ramSpeed: '6000',
+    ramBrand: '64GB (2x32GB) DDR5-6000 CL30',
+    gpuPreference: 'specific',
+    gpuBrand: 'nvidia',
+    vram: '16gb',
+    gpuModel: 'NVIDIA RTX 5080 16GB GDDR7 (~1,100 CHF)',
+    coolingPreference: 'no-preference',
+    fanPreference: 'no-preference',
+    storagePreference: 'specific',
+    ssdCapacity: '2tb',
+    additionalStorage: 'none',
+    psuWattage: '1000w',
+    psuBrand: 'NZXT C1000W ATX 3.1 fully modular',
+    psuModular: true,
+    notes: 'Streaming performance build. CPU: AMD Ryzen 7 9800X3D, the current peak of gaming CPUs with faster clocks and improved thermal management over the 7800X3D. GPU: NVIDIA RTX 5080 16GB GDDR7, a major step up for high-resolution gaming textures and next-gen NVENC dual encoders for crisp streaming. RAM: 64GB (2x32GB) DDR5-6000 CL30 for gaming while running OBS, browser tabs, stream overlays, and editing tools. Board: ROG STRIX B650E-F GAMING WIFI kept for robust VRMs and PCIe 5.0 GPU support. PSU: NZXT C1000W ATX 3.1 fully modular with overhead for transient spikes and a dedicated 12V-2x6 cable. Storage: 2TB NVMe SSD such as WD Black SN850X for fast load times and local VOD/game recording space. Estimated cost: ~2,400-2,650 CHF, driven heavily by the RTX 5080 around ~1,100 CHF in Switzerland.',
+};
+
+const EXTREME_PRESET = {
+    case: '',
+    casePreference: 'no-preference',
+    budget: '4600',
+    purpose: 'gaming-content',
+    setupPurpose: 'Extreme gaming, workstation rendering, high-bitrate recording, streaming, and capture-card workflows',
+    colorScheme: 'standard',
+    rgbPreference: 'minimal',
+    motherboardPreference: 'specific',
+    usbPortsNeeded: '10-plus',
+    wifiEnabled: true,
+    ethernet10gb: true,
+    overclockVRM: true,
+    motherboardModel: 'ROG STRIX X870E-E GAMING WIFI',
+    cpuPreference: 'specific',
+    cpuBrand: 'amd',
+    cpuModel: 'AMD Ryzen 9 9950X3D (16 cores)',
+    ramPreference: 'specific',
+    ramCapacity: '64gb',
+    ramSpeed: '6000',
+    ramBrand: '64GB (2x32GB) DDR5-6000 CL30',
+    gpuPreference: 'specific',
+    gpuBrand: 'nvidia',
+    vram: '32gb',
+    gpuModel: 'NVIDIA RTX 5090 32GB GDDR7 (~2,400-2,600 CHF)',
+    coolingPreference: 'aio',
+    coolingType: 'aio360',
+    fanPreference: 'no-preference',
+    storagePreference: 'specific',
+    ssdCapacity: '4tb',
+    additionalStorage: 'none',
+    psuWattage: '1200w',
+    psuBrand: 'Seasonic Vertex GX-1200W ATX 3.1',
+    psuModular: true,
+    notes: 'Extreme creator build. CPU: AMD Ryzen 9 9950X3D, a 16-core hybrid chip combining heavy multi-threaded performance with 3D V-Cache for top-tier gaming and workstation rendering. GPU: NVIDIA RTX 5090 32GB GDDR7, the flagship option for maximum settings, uncompressed local recording, and streaming. RAM: 64GB (2x32GB) DDR5-6000 CL30 retained for premium stability. Board: ROG STRIX X870E-E GAMING WIFI for X870E chipset features, more dedicated PCIe lanes, USB4, capture cards, and high-bandwidth external drives. PSU: Seasonic Vertex GX-1200W ATX 3.1 for premium power delivery to the RTX 5090 and 16-core CPU under combined load. Storage: 4TB NVMe SSD such as Crucial T500 or similar for high-bitrate footage and large game libraries. Estimated cost: ~4,200-4,600 CHF, largely because a standalone RTX 5090 is around ~2,400-2,600 CHF on the Swiss market.',
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('rigConfigForm');
     const rgbSelect = document.getElementById('rgbPreference');
@@ -308,12 +383,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const conditionalFields = Array.from(document.querySelectorAll('[data-show-when]'));
 
     window.loadPresetGaming = () => {
-        form.reset();
-        applyPreset(GAMING_PRESET);
-        updateConditionalFields();
-        updatePSUWarning();
-        updateMotherboardCompatibility();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loadPreset(GAMING_PRESET);
+    };
+
+    window.loadPresetStreaming = () => {
+        loadPreset(STREAMING_PRESET);
+    };
+
+    window.loadPresetExtreme = () => {
+        loadPreset(EXTREME_PRESET);
     };
 
     window.resetForm = () => {
@@ -433,6 +511,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updatePSUWarning();
     updateMotherboardCompatibility();
+
+    function loadPreset(preset) {
+        form.reset();
+        applyPreset(preset);
+        updateConditionalFields();
+        updatePSUWarning();
+        updateMotherboardCompatibility();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     function applyPreset(preset) {
         for (const [key, value] of Object.entries(preset)) {
