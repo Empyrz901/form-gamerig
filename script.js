@@ -22,7 +22,7 @@ const LABELS = {
     cpuPreference: {
         'no-preference': 'No preference / best value',
         'brand': 'Brand preference only',
-        'specific': 'Specific model',
+        'specific': 'I have a model in mind',
     },
     rgbPreference: {
         'no': 'No RGB',
@@ -43,7 +43,7 @@ const LABELS = {
     gpuPreference: {
         'no-preference': 'No preference / best value',
         'brand': 'Brand preference only',
-        'specific': 'Specific model',
+        'specific': 'I have a model in mind',
     },
     ramPreference: {
         'no-preference': 'No preference',
@@ -53,7 +53,7 @@ const LABELS = {
         'no-preference': 'No preference / best fit',
         'air': 'Ventirad / air cooler',
         'aio': 'AIO liquid cooler',
-        'specific': 'Specific cooler model',
+        'specific': 'I have a model in mind',
     },
     coolingType: {
         'air-budget': 'Air — budget',
@@ -252,6 +252,7 @@ const GAMING_PRESET = {
     casePreference: 'specific',
     budget: '1900',
     purpose: 'gaming',
+    setupPurpose: '1440p gaming with strong value parts and quiet daily use',
     colorScheme: 'standard',
     rgbPreference: 'minimal',
     motherboardPreference: 'specific',
@@ -291,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const strimerOption = document.getElementById('strimerOption');
     const rgbFanOption = document.getElementById('rgbFanOption');
     const preferenceControls = Array.from(document.querySelectorAll('[data-preference-control]'));
+    const conditionalFields = Array.from(document.querySelectorAll('[data-show-when]'));
 
     window.loadPresetGaming = () => {
         form.reset();
@@ -448,6 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
             toggle(target, show);
             if (!show) clearFormControls(target);
         });
+        conditionalFields.forEach((field) => {
+            const show = shouldShowConditionalField(field);
+            toggle(field, show);
+            if (!show) clearFormControls(field);
+        });
         updateMotherboardCompatibility();
         updatePSUWarning();
     }
@@ -473,6 +480,12 @@ document.addEventListener('DOMContentLoaded', () => {
             el.setCustomValidity('');
             el.classList.remove('field-error');
         });
+    }
+
+    function shouldShowConditionalField(field) {
+        const [controlId, expectedValue] = field.dataset.showWhen.split(':');
+        const control = document.getElementById(controlId);
+        return Boolean(control && control.value === expectedValue);
     }
 
     async function generatePDF() {
@@ -541,6 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
             casePreference: get('casePreference'),
             budget: get('budget'),
             purpose: get('purpose'),
+            setupPurpose: get('setupPurpose'),
             colorScheme: get('colorScheme'),
             rgbPreference: get('rgbPreference'),
             strimerCables: bool('strimerCables'),
@@ -723,6 +737,7 @@ function renderPreferencePDF(c) {
             title: 'Overview',
             rows: [
                 ['Purpose', label('purpose', c.purpose)],
+                ['Purpose details', text(c.setupPurpose)],
                 ['Budget', c.budget ? `${escapeHTML(c.budget)} CHF` : '—'],
                 ['Configuration style', label('colorScheme', c.colorScheme)],
                 ['RGB preference', label('rgbPreference', c.rgbPreference)],

@@ -53,7 +53,7 @@
                         <input type="number" id="budget" name="budget" placeholder="2000" min="500" required>
                     </div>
                     <div class="form-group">
-                        <label for="purpose">Primary use</label>
+                        <label for="purpose">Main purpose for the setup</label>
                         <select id="purpose" name="purpose" required>
                             <option value="">Select...</option>
                             <option value="gaming">Gaming</option>
@@ -62,6 +62,10 @@
                             <option value="general">General use</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="setupPurpose">Purpose details</label>
+                    <input type="text" id="setupPurpose" name="setupPurpose" placeholder="1440p gaming, streaming, school work, CAD, quiet office setup...">
                 </div>
             </fieldset>
 
@@ -72,7 +76,7 @@
                         <label for="casePreference">Case reference?</label>
                         <select id="casePreference" name="casePreference" data-preference-control="caseDetails" required>
                             <option value="">Select...</option>
-                            <option value="no-preference">No preference</option>
+                            <option value="no-preference" selected>No preference</option>
                             <option value="specific">I have a case in mind</option>
                         </select>
                     </div>
@@ -80,7 +84,7 @@
                         <label for="colorScheme">White only or standard?</label>
                         <select id="colorScheme" name="colorScheme" required>
                             <option value="">Select...</option>
-                            <option value="standard">Standard / best value</option>
+                            <option value="standard" selected>Standard / best value</option>
                             <option value="white-only">White only</option>
                             <option value="black">Black</option>
                             <option value="mixed">Black & white</option>
@@ -101,7 +105,7 @@
                         <label for="rgbPreference">RGB preference?</label>
                         <select id="rgbPreference" name="rgbPreference" required>
                             <option value="">Select...</option>
-                            <option value="no">No RGB</option>
+                            <option value="no" selected>No RGB</option>
                             <option value="minimal">Minimal RGB</option>
                             <option value="moderate">Moderate RGB</option>
                             <option value="full">Full RGB (fans & AIO)</option>
@@ -123,7 +127,7 @@
                     <label for="motherboardPreference">Motherboard reference?</label>
                     <select id="motherboardPreference" name="motherboardPreference" data-preference-control="motherboardDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference</option>
+                        <option value="no-preference" selected>No preference</option>
                         <option value="specific">I have a model in mind</option>
                     </select>
                 </div>
@@ -158,9 +162,9 @@
                     <label for="cpuPreference">CPU preference?</label>
                     <select id="cpuPreference" name="cpuPreference" data-preference-control="cpuDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference / best value</option>
+                        <option value="no-preference" selected>No preference / best value</option>
                         <option value="brand">Brand preference only</option>
-                        <option value="specific">Specific model</option>
+                        <option value="specific">I have a model in mind</option>
                     </select>
                 </div>
 
@@ -172,11 +176,11 @@
                                 <option value="">Select...</option>
                                 <option value="intel">Intel</option>
                                 <option value="amd">AMD</option>
-                                <option value="no-preference">No preference</option>
+                                <option value="no-preference" selected>No preference</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="cpuModel">Specific CPU model</label>
+                        <div class="form-group hidden" data-show-when="cpuPreference:specific">
+                            <label for="cpuModel">Which CPU model?</label>
                             <input type="text" id="cpuModel" name="cpuModel" placeholder="Ryzen 7 7800X3D, Core i7-14700K">
                         </div>
                     </div>
@@ -189,7 +193,7 @@
                     <label for="ramPreference">RAM quantity?</label>
                     <select id="ramPreference" name="ramPreference" data-preference-control="ramDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference</option>
+                        <option value="no-preference" selected>No preference</option>
                         <option value="specific">I know the capacity I want</option>
                     </select>
                 </div>
@@ -230,9 +234,9 @@
                     <label for="gpuPreference">GPU brand?</label>
                     <select id="gpuPreference" name="gpuPreference" data-preference-control="gpuDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference / best value</option>
+                        <option value="no-preference" selected>No preference / best value</option>
                         <option value="brand">Brand preference only</option>
-                        <option value="specific">Specific model</option>
+                        <option value="specific">I have a model in mind</option>
                     </select>
                 </div>
 
@@ -244,7 +248,7 @@
                                 <option value="">Select...</option>
                                 <option value="nvidia">NVIDIA (RTX)</option>
                                 <option value="amd">AMD (Radeon)</option>
-                                <option value="no-preference">No preference</option>
+                                <option value="no-preference" selected>No preference</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -258,8 +262,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="gpuModel">Specific GPU model</label>
+                    <div class="form-group hidden" data-show-when="gpuPreference:specific">
+                        <label for="gpuModel">Which GPU model?</label>
                         <input type="text" id="gpuModel" name="gpuModel" placeholder="RTX 5080, RX 7900 XTX">
                     </div>
                 </div>
@@ -271,10 +275,10 @@
                     <label for="coolingPreference">Ventirad or AIO?</label>
                     <select id="coolingPreference" name="coolingPreference" data-preference-control="coolingDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference / best fit</option>
+                        <option value="no-preference" selected>No preference / best fit</option>
                         <option value="air">Ventirad / air cooler</option>
                         <option value="aio">AIO liquid cooler</option>
-                        <option value="specific">Specific cooler model</option>
+                        <option value="specific">I have a model in mind</option>
                     </select>
                 </div>
 
@@ -292,8 +296,8 @@
                                 <option value="aio360">AIO - 360mm (150-200 CHF)</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="coolingBrand">Specific cooler model</label>
+                        <div class="form-group hidden" data-show-when="coolingPreference:specific">
+                            <label for="coolingBrand">Which cooler model?</label>
                             <input type="text" id="coolingBrand" name="coolingBrand" placeholder="Noctua NH-D15, Corsair H150i Elite">
                         </div>
                     </div>
@@ -306,7 +310,7 @@
                     <label for="fanPreference">Extra case fans?</label>
                     <select id="fanPreference" name="fanPreference" data-preference-control="fanDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference / builder decides</option>
+                        <option value="no-preference" selected>No preference / builder decides</option>
                         <option value="stock">Stock fans only</option>
                         <option value="specific">Specify fan layout</option>
                     </select>
@@ -358,7 +362,7 @@
                     <label for="storagePreference">Main storage quantity?</label>
                     <select id="storagePreference" name="storagePreference" data-preference-control="storageDetails" required>
                         <option value="">Select...</option>
-                        <option value="no-preference">No preference</option>
+                        <option value="no-preference" selected>No preference</option>
                         <option value="specific">I know the SSD size</option>
                     </select>
                 </div>
@@ -379,7 +383,7 @@
                             <label for="additionalStorage">Additional storage</label>
                             <select id="additionalStorage" name="additionalStorage" data-preference-control="additionalStorageDetails">
                                 <option value="">Select...</option>
-                                <option value="none">None</option>
+                                <option value="none" selected>None</option>
                                 <option value="ssd-additional">Extra SSD</option>
                                 <option value="hdd-eco">HDD (archival)</option>
                                 <option value="ssd-hdd">SSD + HDD</option>
@@ -399,7 +403,7 @@
                     <div class="form-group">
                         <label for="psuWattage">Wattage preference?</label>
                         <select id="psuWattage" name="psuWattage">
-                            <option value="">No preference / builder decides</option>
+                            <option value="" selected>No preference / builder decides</option>
                             <option value="750w">750W</option>
                             <option value="850w">850W</option>
                             <option value="1000w">1000W</option>
