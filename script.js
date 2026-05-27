@@ -199,8 +199,11 @@ const KNOWN_CASE_FORM_FACTORS = {
 
 const KNOWN_MOTHERBOARD_FORM_FACTORS = {
     'asus rog strix b650e-e': 'atx',
+    'rog strix b650e-f': 'atx',
+    'asus rog strix b650e-f': 'atx',
     'asus tuf b650e-e': 'atx',
     'tuf gaming b650e-e': 'atx',
+    'b650e-f': 'atx',
     'b650e-e': 'atx',
 };
 
@@ -261,7 +264,7 @@ const GAMING_PRESET = {
     motherboardPreference: 'specific',
     wifiEnabled: true,
     overclockVRM: true,
-    motherboardModel: 'ASUS TUF B650E-E WiFi (~145 CHF)',
+    motherboardModel: 'ROG STRIX B650E-F GAMING WIFI (~170 CHF)',
     cpuPreference: 'specific',
     cpuBrand: 'amd',
     cpuModel: 'AMD Ryzen 7 7800X3D (~234 CHF)',
@@ -286,7 +289,7 @@ const GAMING_PRESET = {
     psuWattage: '850w',
     psuBrand: 'NZXT C850 Gold ATX 3.1 (~100 CHF)',
     psuModular: true,
-    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,500 CHF without DRAM cache SSD, or ~1,555 CHF with a DRAM cache NVMe SSD (case 133 + board 145 + CPU 234 + RAM 340 + GPU 365 + cooler 60 + SSD 100/155 + PSU 100 + 3x fans 22).',
+    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,525 CHF without DRAM cache SSD, or ~1,580 CHF with a DRAM cache NVMe SSD (case 133 + board 170 + CPU 234 + RAM 340 + GPU 365 + cooler 60 + SSD 100/155 + PSU 100 + 3x fans 22).',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
