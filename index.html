@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -147,7 +147,7 @@
                     </div>
                     <div class="form-group checkbox-group">
                         <input type="checkbox" id="ethernet10gb" name="ethernet10gb">
-                        <label for="ethernet10gb">10GbE</label>
+                        <label for="ethernet10gb">10 Gigabit Ethernet</label>
                     </div>
                     <div class="form-group checkbox-group">
                         <input type="checkbox" id="overclockVRM" name="overclockVRM">
@@ -204,6 +204,7 @@
                             <label for="ramCapacity">Capacity</label>
                             <select id="ramCapacity" name="ramCapacity">
                                 <option value="">Select...</option>
+                                <option value="16gb">16GB (2x8)</option>
                                 <option value="32gb">32GB (2x16)</option>
                                 <option value="48gb">48GB (2x24)</option>
                                 <option value="64gb">64GB (2x32)</option>
@@ -255,6 +256,7 @@
                             <label for="vram">VRAM target</label>
                             <select id="vram" name="vram">
                                 <option value="">Select...</option>
+                                <option value="8gb">8GB</option>
                                 <option value="12gb">12GB</option>
                                 <option value="16gb">16GB</option>
                                 <option value="24gb">24GB</option>

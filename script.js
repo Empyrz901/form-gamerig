@@ -56,18 +56,19 @@ const LABELS = {
         'specific': 'I have a model in mind',
     },
     coolingType: {
-        'air-budget': 'Air — budget',
-        'air-mid': 'Air — mid-range',
-        'air-high': 'Air — high-end',
+        'air-budget': 'Air - budget',
+        'air-mid': 'Air - mid-range',
+        'air-high': 'Air - high-end',
         'aio240': 'AIO 240mm',
         'aio280': 'AIO 280mm',
         'aio360': 'AIO 360mm',
     },
     ramCapacity: {
-        '32gb': '32GB (2×16)',
-        '48gb': '48GB (2×24)',
-        '64gb': '64GB (2×32)',
-        '96gb': '96GB (2×48)',
+        '16gb': '16GB (2x8)',
+        '32gb': '32GB (2x16)',
+        '48gb': '48GB (2x24)',
+        '64gb': '64GB (2x32)',
+        '96gb': '96GB (2x48)',
     },
     ramSpeed: {
         '5600': 'DDR5-5600',
@@ -76,6 +77,7 @@ const LABELS = {
         '6800': 'DDR5-6800+',
     },
     vram: {
+        '8gb': '8GB',
         '12gb': '12GB',
         '16gb': '16GB',
         '24gb': '24GB',
@@ -83,17 +85,17 @@ const LABELS = {
     },
     caseIntakeFans: {
         'stock': 'Stock',
-        '1x120': '+1× 120mm',
-        '2x120': '+2× 120mm',
-        '3x120': '+3× 120mm (full front)',
-        '2x140': '+2× 140mm',
+        '1x120': '+1x 120mm',
+        '2x120': '+2x 120mm',
+        '3x120': '+3x 120mm (full front)',
+        '2x140': '+2x 140mm',
     },
     caseExhaustFans: {
         'stock': 'Stock',
-        '1x120': '1× 120mm (rear)',
-        '1x140': '1× 140mm (rear)',
-        '2x120': '2× 120mm (top)',
-        '1x120-1x140': '1× 120mm rear + 1× 140mm top',
+        '1x120': '1x 120mm (rear)',
+        '1x140': '1x 140mm (rear)',
+        '2x120': '2x 120mm (top)',
+        '1x120-1x140': '1x 120mm rear + 1x 140mm top',
     },
     fanPreference: {
         'no-preference': 'No preference / builder decides',
@@ -126,7 +128,7 @@ const LABELS = {
 
 // CPU TDP / PL2 (W). Used to bump PSU recommendation for power-hungry chips.
 const CPU_TDP_W = {
-    // Intel Core Ultra (LGA1851) — total package power approx
+    // Intel Core Ultra (LGA1851) - total package power approx
     '285k': 250, '265k': 250, '265kf': 250, '245k': 159, '245kf': 159, '235': 159,
     // Intel 14th / 13th gen
     '14900k': 253, '14900kf': 253, '14900': 219, '14700k': 253, '14700kf': 253, '14700': 219,
@@ -203,7 +205,6 @@ const KNOWN_MOTHERBOARD_FORM_FACTORS = {
 function normalizeFormFactorText(value) {
     return (value || '')
         .toLowerCase()
-        .replace(/[×x]/g, 'x')
         .replace(/[_/]+/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
@@ -228,7 +229,7 @@ function inferFormFactor(value, knownModels = {}) {
     if (!text) return null;
 
     if (/(?:^|\b)(?:e\s*-?\s*atx|eatx|extended\s+atx)(?:\b|$)/i.test(text)) return 'eatx';
-    if (/(?:^|\b)(?:micro\s*-?\s*atx|m\s*-?\s*atx|matx|u\s*-?\s*atx|uatx|µ\s*-?\s*atx)(?:\b|$)/i.test(text)) return 'matx';
+    if (/(?:^|\b)(?:micro\s*-?\s*atx|m\s*-?\s*atx|matx|u\s*-?\s*atx|uatx)(?:\b|$)/i.test(text)) return 'matx';
     if (/(?:^|\b)(?:mini\s*-?\s*itx|m\s*-?\s*itx|itx)(?:\b|$)/i.test(text)) return 'itx';
     if (/(?:^|\b)atx(?:\b|$)/i.test(text)) return 'atx';
 
@@ -283,7 +284,7 @@ const GAMING_PRESET = {
     psuWattage: '850w',
     psuBrand: 'NZXT C850 Gold ATX 3.1 (~130 CHF)',
     psuModular: true,
-    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,890 CHF on digitec (case 133 + board 287 + CPU 447 + RAM 330 + GPU 420 + cooler 60 + SSD 62 + PSU 130 + 3× fans 22).',
+    notes: 'Gaming-focused build around the 7800X3D and RX 9060 XT. Budget air cooler (Peerless Assassin 120 SE) handles the 7800X3D quietly. Approx. total: ~1,890 CHF on digitec (case 133 + board 287 + CPU 447 + RAM 330 + GPU 420 + cooler 60 + SSD 62 + PSU 130 + 3x fans 22).',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -489,59 +490,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generatePDF() {
-        if (typeof html2pdf === 'undefined') {
+        const jsPDF = window.jspdf?.jsPDF;
+        if (!jsPDF) {
             alert('PDF library failed to load. Check your internet connection and refresh.');
             return;
         }
 
         const config = collectConfig();
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = [
-            'position: fixed',
-            'left: 0',
-            'top: 0',
-            'width: 794px',
-            'background: #ffffff',
-            'pointer-events: none',
-            'z-index: 2147483647',
-        ].join('; ');
-        wrapper.innerHTML = renderPreferencePDF(config);
-        document.body.appendChild(wrapper);
-
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
-
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-
-        const cleanup = () => {
-            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-        };
-
-        html2pdf()
-            .set({
-                margin: 10,
-                filename: `pc-build-${new Date().toISOString().slice(0, 10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: 794,
-                    windowHeight: wrapper.scrollHeight,
-                },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
-            })
-            .from(wrapper)
-            .save()
-            .then(cleanup)
-            .catch((err) => {
-                cleanup();
-                console.error('PDF generation failed:', err);
-                alert('PDF generation failed: ' + (err && err.message ? err.message : err));
-            });
+        savePreferencePDF(config, jsPDF);
     }
 
     function collectConfig() {
@@ -604,11 +560,11 @@ function escapeHTML(str) {
 }
 
 function label(field, value) {
-    if (!value) return '—';
+    if (!value) return '-';
     return LABELS[field]?.[value] || value;
 }
 
-function text(value, fallback = '—') {
+function text(value, fallback = '-') {
     const v = (value ?? '').toString().trim();
     return v ? escapeHTML(v) : fallback;
 }
@@ -617,128 +573,19 @@ function yesNo(value) {
     return value ? 'Yes' : 'No';
 }
 
-function renderPDF(c) {
-    const date = new Date().toLocaleDateString('en-GB', {
-        year: 'numeric', month: 'long', day: 'numeric',
-    });
-
-    const sections = [
-        {
-            title: 'Overview',
-            rows: [
-                ['Purpose', label('purpose', c.purpose)],
-                ['Budget', c.budget ? `${escapeHTML(c.budget)} CHF` : '—'],
-                ['Case', text(c.case)],
-                ['Color scheme', label('colorScheme', c.colorScheme)],
-                ['RGB lighting', label('rgbPreference', c.rgbPreference)],
-                ['RGB Strimer cables', yesNo(c.strimerCables)],
-            ],
-        },
-        {
-            title: 'Motherboard',
-            rows: [
-                ['Model', text(c.motherboardModel)],
-                ['WiFi', yesNo(c.wifiEnabled)],
-                ['10GbE', yesNo(c.ethernet10gb)],
-                ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
-            ],
-        },
-        {
-            title: 'Processor',
-            rows: [
-                ['Brand', label('cpuBrand', c.cpuBrand)],
-                ['Model', text(c.cpuModel)],
-            ],
-        },
-        {
-            title: 'Memory',
-            rows: [
-                ['Capacity', label('ramCapacity', c.ramCapacity)],
-                ['Speed', label('ramSpeed', c.ramSpeed)],
-                ['Brand', text(c.ramBrand)],
-            ],
-        },
-        {
-            title: 'Graphics',
-            rows: [
-                ['Brand', label('gpuBrand', c.gpuBrand)],
-                ['VRAM', label('vram', c.vram)],
-                ['Model', text(c.gpuModel)],
-            ],
-        },
-        {
-            title: 'CPU cooling',
-            rows: [
-                ['Type', label('coolingType', c.coolingType)],
-                ['Model', text(c.coolingBrand)],
-            ],
-        },
-        {
-            title: 'Case fans',
-            rows: [
-                ['Intake', label('caseIntakeFans', c.caseIntakeFans)],
-                ['Exhaust', label('caseExhaustFans', c.caseExhaustFans)],
-                ['Model', text(c.fanBrand)],
-                ['RGB fans', yesNo(c.rgbFans)],
-            ],
-        },
-        {
-            title: 'Storage',
-            rows: [
-                ['Primary SSD', label('ssdCapacity', c.ssdCapacity)],
-                ['Additional', label('additionalStorage', c.additionalStorage)],
-                ...(c.additionalStorage && c.additionalStorage !== 'none'
-                    ? [['Additional capacity', text(c.additionalCapacity)]]
-                    : []),
-            ],
-        },
-        {
-            title: 'Power supply',
-            rows: [
-                ['Wattage', label('psuWattage', c.psuWattage)],
-                ['Brand', text(c.psuBrand)],
-                ['Fully modular', yesNo(c.psuModular)],
-            ],
-        },
-    ];
-
-    const sectionsHTML = sections.map(renderSection).join('');
-    const notesHTML = c.notes
-        ? `
-            <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">Notes</div>
-                <div style="padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a;">${escapeHTML(c.notes)}</div>
-            </div>
-        `
-        : '';
-
-    return `
-        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 24px 28px; font-size: 11px; line-height: 1.5; background: #ffffff; box-sizing: border-box;">
-            <div style="border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px;">
-                <div style="font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 4px 0; color: #0a0a0a;">PC Build Configuration</div>
-                <div style="font-size: 11px; color: #6b6b6b; margin: 0;">Generated ${escapeHTML(date)}</div>
-            </div>
-
-            ${sectionsHTML}
-            ${notesHTML}
-
-            <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center;">Cable management: presentable routing, clean and organized — not a premium showcase build.</div>
-        </div>
-    `;
+function plainText(value, fallback = '-') {
+    const v = (value ?? '').toString().trim();
+    return v || fallback;
 }
 
-function renderPreferencePDF(c) {
-    const date = new Date().toLocaleDateString('en-GB', {
-        year: 'numeric', month: 'long', day: 'numeric',
-    });
-
-    const sections = [
+function preferenceSections(c) {
+    return [
         {
             title: 'Overview',
             rows: [
                 ['Purpose', label('purpose', c.purpose)],
-                ['Purpose details', text(c.setupPurpose)],
-                ['Budget', c.budget ? `${escapeHTML(c.budget)} CHF` : '—'],
+                ['Purpose details', plainText(c.setupPurpose)],
+                ['Budget', c.budget ? `${c.budget} CHF` : '-'],
                 ['Configuration style', label('colorScheme', c.colorScheme)],
                 ['RGB preference', label('rgbPreference', c.rgbPreference)],
             ],
@@ -747,7 +594,7 @@ function renderPreferencePDF(c) {
             title: 'Case & look',
             rows: [
                 ['Case preference', label('casePreference', c.casePreference)],
-                ['Case', text(c.case)],
+                ['Case', plainText(c.case)],
                 ['RGB Strimer cables', yesNo(c.strimerCables)],
             ],
         },
@@ -755,9 +602,9 @@ function renderPreferencePDF(c) {
             title: 'Motherboard',
             rows: [
                 ['Preference', label('motherboardPreference', c.motherboardPreference)],
-                ['Model', text(c.motherboardModel)],
+                ['Model', plainText(c.motherboardModel)],
                 ['WiFi', yesNo(c.wifiEnabled)],
-                ['10GbE', yesNo(c.ethernet10gb)],
+                ['10 Gigabit Ethernet', yesNo(c.ethernet10gb)],
                 ['Overclocking-grade VRM', yesNo(c.overclockVRM)],
             ],
         },
@@ -766,7 +613,7 @@ function renderPreferencePDF(c) {
             rows: [
                 ['Preference', label('cpuPreference', c.cpuPreference)],
                 ['Brand', label('cpuBrand', c.cpuBrand)],
-                ['Model', text(c.cpuModel)],
+                ['Model', plainText(c.cpuModel)],
             ],
         },
         {
@@ -775,7 +622,7 @@ function renderPreferencePDF(c) {
                 ['Preference', label('ramPreference', c.ramPreference)],
                 ['Capacity', label('ramCapacity', c.ramCapacity)],
                 ['Speed', label('ramSpeed', c.ramSpeed)],
-                ['Brand', text(c.ramBrand)],
+                ['Brand', plainText(c.ramBrand)],
             ],
         },
         {
@@ -784,7 +631,7 @@ function renderPreferencePDF(c) {
                 ['Preference', label('gpuPreference', c.gpuPreference)],
                 ['Brand', label('gpuBrand', c.gpuBrand)],
                 ['VRAM', label('vram', c.vram)],
-                ['Model', text(c.gpuModel)],
+                ['Model', plainText(c.gpuModel)],
             ],
         },
         {
@@ -792,7 +639,7 @@ function renderPreferencePDF(c) {
             rows: [
                 ['Preference', label('coolingPreference', c.coolingPreference)],
                 ['Type', label('coolingType', c.coolingType)],
-                ['Model', text(c.coolingBrand)],
+                ['Model', plainText(c.coolingBrand)],
             ],
         },
         {
@@ -801,7 +648,7 @@ function renderPreferencePDF(c) {
                 ['Preference', label('fanPreference', c.fanPreference)],
                 ['Intake', label('caseIntakeFans', c.caseIntakeFans)],
                 ['Exhaust', label('caseExhaustFans', c.caseExhaustFans)],
-                ['Model', text(c.fanBrand)],
+                ['Model', plainText(c.fanBrand)],
                 ['RGB fans', yesNo(c.rgbFans)],
             ],
         },
@@ -812,7 +659,7 @@ function renderPreferencePDF(c) {
                 ['Primary SSD', label('ssdCapacity', c.ssdCapacity)],
                 ['Additional', label('additionalStorage', c.additionalStorage)],
                 ...(c.additionalStorage && c.additionalStorage !== 'none'
-                    ? [['Additional capacity', text(c.additionalCapacity)]]
+                    ? [['Additional capacity', plainText(c.additionalCapacity)]]
                     : []),
             ],
         },
@@ -820,52 +667,81 @@ function renderPreferencePDF(c) {
             title: 'Power supply',
             rows: [
                 ['Wattage', label('psuWattage', c.psuWattage)],
-                ['Brand', text(c.psuBrand)],
+                ['Brand', plainText(c.psuBrand)],
                 ['Fully modular', yesNo(c.psuModular)],
             ],
         },
     ];
-
-    const sectionsHTML = sections.map(renderSection).join('');
-    const notesHTML = c.notes
-        ? `
-            <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">Notes</div>
-                <div style="padding: 12px 14px; background: #fafafa; border: 1px solid #e6e6e6; border-radius: 6px; white-space: pre-wrap; font-size: 11px; color: #0a0a0a;">${escapeHTML(c.notes)}</div>
-            </div>
-        `
-        : '';
-
-    return `
-        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; padding: 24px 28px; font-size: 11px; line-height: 1.5; background: #ffffff; box-sizing: border-box;">
-            <div style="border-bottom: 1px solid #e6e6e6; padding-bottom: 16px; margin-bottom: 24px;">
-                <div style="font-size: 22px; font-weight: 600; margin: 0 0 4px 0; color: #0a0a0a;">PC Build Configuration</div>
-                <div style="font-size: 11px; color: #6b6b6b; margin: 0;">Generated ${escapeHTML(date)}</div>
-            </div>
-
-            ${sectionsHTML}
-            ${notesHTML}
-
-            <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e6e6e6; font-size: 10px; color: #9a9a9a; text-align: center;">Cable management: presentable routing, clean and organized - not premium showcase level.</div>
-        </div>
-    `;
 }
 
-function renderSection({ title, rows }) {
-    const items = rows
-        .map(([k, v]) => `
-            <tr>
-                <td style="padding: 5px 0; color: #6b6b6b; font-size: 11px; width: 35%; vertical-align: top;">${escapeHTML(k)}</td>
-                <td style="padding: 5px 0; color: #0a0a0a; font-size: 11px; font-weight: 500; vertical-align: top;">${v}</td>
-            </tr>
-        `)
-        .join('');
-    return `
-        <div style="margin-bottom: 20px; page-break-inside: avoid;">
-            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9a9a9a; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid #e6e6e6;">${escapeHTML(title)}</div>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tbody>${items}</tbody>
-            </table>
-        </div>
-    `;
+function savePreferencePDF(c, PDFConstructor) {
+    const doc = new PDFConstructor({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const margin = 14;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const contentWidth = pageWidth - margin * 2;
+    let y = 18;
+
+    const addPageIfNeeded = (height = 8) => {
+        if (y + height <= pageHeight - margin) return;
+        doc.addPage();
+        y = margin;
+    };
+
+    const writeLine = (textValue, x, options = {}) => {
+        const size = options.size || 10;
+        const style = options.style || 'normal';
+        const color = options.color || [10, 10, 10];
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(...color);
+        doc.text(String(textValue), x, y);
+    };
+
+    doc.setProperties({ title: 'PC Build Configuration' });
+    writeLine('PC Build Configuration', margin, { size: 18, style: 'bold' });
+    y += 7;
+    writeLine(`Generated ${new Date().toLocaleDateString('en-GB')}`, margin, { size: 9, color: [107, 107, 107] });
+    y += 8;
+    doc.setDrawColor(230, 230, 230);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 9;
+
+    preferenceSections(c).forEach((section) => {
+        addPageIfNeeded(18);
+        writeLine(section.title.toUpperCase(), margin, { size: 9, style: 'bold', color: [130, 130, 130] });
+        y += 4;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 5;
+
+        section.rows.forEach(([key, value]) => {
+            const wrappedValue = doc.splitTextToSize(String(value), contentWidth - 58);
+            const rowHeight = Math.max(6, wrappedValue.length * 5);
+            addPageIfNeeded(rowHeight);
+            writeLine(key, margin, { size: 9, color: [107, 107, 107] });
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(10, 10, 10);
+            doc.text(wrappedValue, margin + 58, y);
+            y += rowHeight;
+        });
+
+        y += 5;
+    });
+
+    if (c.notes) {
+        addPageIfNeeded(18);
+        writeLine('NOTES', margin, { size: 9, style: 'bold', color: [130, 130, 130] });
+        y += 6;
+        const noteLines = doc.splitTextToSize(c.notes, contentWidth);
+        noteLines.forEach((line) => {
+            addPageIfNeeded(5);
+            writeLine(line, margin, { size: 9 });
+            y += 5;
+        });
+    }
+
+    doc.save(`pc-build-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
+
